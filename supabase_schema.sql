@@ -24,12 +24,9 @@ CREATE TABLE IF NOT EXISTS public.dumpy_screenshots (
     file_url TEXT NOT NULL,                                            -- Direct public image CDN link
     storage_path TEXT NOT NULL,                                        -- Storage bucket path
     file_size BIGINT,                                                  -- Size in bytes
-    width INT,                                                         -- Natural width
-    height INT,                                                        -- Natural height
     mime_type TEXT DEFAULT 'image/png',                                -- MIME type
     is_inserted BOOLEAN DEFAULT false,                                 -- Insertion status into Figma
-    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
-    expires_at TIMESTAMPTZ DEFAULT (timezone('utc'::text, now()) + INTERVAL '7 days') -- Auto-expiry
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 -- Schema Migration Helpers (if table already existed)
@@ -41,8 +38,15 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dumpy_screenshots' AND column_name='user_email') THEN
         ALTER TABLE public.dumpy_screenshots ADD COLUMN user_email TEXT;
     END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dumpy_screenshots' AND column_name='expires_at') THEN
-        ALTER TABLE public.dumpy_screenshots ADD COLUMN expires_at TIMESTAMPTZ DEFAULT (timezone('utc'::text, now()) + INTERVAL '7 days');
+    -- Remove width, height, expires_at if present
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dumpy_screenshots' AND column_name='width') THEN
+        ALTER TABLE public.dumpy_screenshots DROP COLUMN width;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dumpy_screenshots' AND column_name='height') THEN
+        ALTER TABLE public.dumpy_screenshots DROP COLUMN height;
+    END IF;
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dumpy_screenshots' AND column_name='expires_at') THEN
+        ALTER TABLE public.dumpy_screenshots DROP COLUMN expires_at;
     END IF;
 END $$;
 
@@ -147,13 +151,3 @@ ON storage.objects FOR DELETE USING (bucket_id = 'dumpy-screenshots');
 DROP POLICY IF EXISTS "Allow public update in dumpy-screenshots bucket" ON storage.objects;
 CREATE POLICY "Allow public update in dumpy-screenshots bucket"
 ON storage.objects FOR UPDATE USING (bucket_id = 'dumpy-screenshots');
-
--- 10. Automated Temporary Screenshot Cleanup Function (7 days expiry)
-CREATE OR REPLACE FUNCTION public.cleanup_expired_dumpy_screenshots()
-RETURNS void AS $$
-BEGIN
-    DELETE FROM public.dumpy_screenshots
-    WHERE created_at < NOW() - INTERVAL '7 days'
-       OR (expires_at IS NOT NULL AND expires_at < NOW());
-END;
-$$ LANGUAGE plpgsql;

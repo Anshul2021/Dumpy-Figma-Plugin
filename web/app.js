@@ -280,8 +280,6 @@
         file_url: publicUrl,
         storage_path: storagePath,
         file_size: file.size,
-        width: fileItem.width,
-        height: fileItem.height,
         mime_type: file.type || 'image/png',
         is_inserted: false
       };

@@ -70,6 +70,7 @@ figma.ui.onmessage = async (msg) => {
         const savedSupabaseUrl = await figma.clientStorage.getAsync("dumpy_supabase_url");
         const savedSupabaseKey = await figma.clientStorage.getAsync("dumpy_supabase_key");
         const savedSectionId = await figma.clientStorage.getAsync("dumpy_preferred_section_id");
+        const savedUserProfile = await figma.clientStorage.getAsync("dumpy_user_profile");
 
         const sections = getPageSections();
 
@@ -79,8 +80,16 @@ figma.ui.onmessage = async (msg) => {
           savedSupabaseUrl: savedSupabaseUrl || null,
           savedSupabaseKey: savedSupabaseKey || null,
           savedSectionId: savedSectionId || null,
+          savedUserProfile: savedUserProfile || null,
           sections: sections
         });
+        break;
+      }
+
+      case "OPEN_EXTERNAL": {
+        if (msg.url) {
+          figma.openExternal(msg.url);
+        }
         break;
       }
 
