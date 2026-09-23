@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "name": "dumpy-mobile-uploader",
+  "public": true,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/web/$1"
+    }
+  ]
+}

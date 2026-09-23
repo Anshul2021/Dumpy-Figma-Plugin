@@ -1,0 +1,19 @@
+{
+  "name": "Dumpy — Real-Time Screenshot Inbox",
+  "id": "dumpy-screenshot-inbox",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "editorType": [
+    "figma",
+    "figjam"
+  ],
+  "networkAccess": {
+    "allowedDomains": [
+      "*"
+    ],
+    "reasoning": "Dumpy connects to your Supabase project to poll incoming mobile screenshots in real time and loads the DM Sans Google font."
+  }
+}

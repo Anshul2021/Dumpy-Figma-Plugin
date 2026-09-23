@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dumpy — Real-Time Screenshot Inbox</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Clean Light Mode Blue Theme */
+      --bg-page: #F8FAFC;
+      --bg-surface: #FFFFFF;
+      --bg-surface-hover: #F1F5F9;
+      --bg-subtle: #F8FAFC;
+      --bg-accent-subtle: #EFF6FF;
+      
+      --primary: #2563EB;
+      --primary-hover: #1D4ED8;
+      --primary-light: #EFF6FF;
+      --primary-border: #BFDBFE;
+      --primary-glow: rgba(37, 99, 235, 0.2);
+      
+      --success: #059669;
+      --success-bg: #ECFDF5;
+      --success-border: #A7F3D0;
+      
+      --warning: #D97706;
+      --warning-bg: #FFFBEB;
+      --warning-border: #FDE68A;
+      
+      --danger: #DC2626;
+      --danger-bg: #FEF2F2;
+      --danger-border: #FECACA;
+      
+      --text-main: #0F172A;
+      --text-secondary: #475569;
+      --text-muted: #94A3B8;
+      
+      --border-color: #E2E8F0;
+      --border-light: #F1F5F9;
+      
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-xl: 18px;
+      
+      --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 4px 12px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
+      --shadow-primary: 0 4px 14px rgba(37, 99, 235, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-size: 13px;
+      line-height: 1.45;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #2563EB, #3B82F6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px var(--primary-glow);
+    }
+
+    .brand-text {
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 20px;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px rgba(5, 150, 105, 0.4);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .icon-btn:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-main);
+      border-color: var(--border-color);
+    }
+    .icon-btn.active {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    /* Main Scroll Area */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Minimal Pairing Card */
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      position: relative;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .pairing-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pairing-container {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .qr-box {
+      width: 96px;
+      height: 96px;
+      background: #FFFFFF;
+      padding: 4px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      overflow: hidden;
+      position: relative;
+    }
+    .qr-box:hover {
+      transform: scale(1.02);
+      box-shadow: var(--shadow-md);
+    }
+
+    .qr-box canvas, .qr-box svg, .qr-box img {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+      object-fit: contain;
+    }
+
+    .pairing-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .room-code-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--primary-border);
+      width: fit-content;
+      letter-spacing: 0.5px;
+    }
+
+    .pairing-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+
+    .pairing-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .btn-secondary-sm {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 4px 9px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .btn-secondary-sm:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-main);
+      border-color: #CBD5E1;
+    }
+
+    /* Section Target Selector */
+    .section-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 12px 14px;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .section-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .select-wrapper {
+      position: relative;
+      display: flex;
+      width: 100%;
+    }
+
+    .custom-select {
+      width: 100%;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 7px 28px 7px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      outline: none;
+      appearance: none;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .custom-select:focus {
+      border-color: var(--primary);
+      background: #FFFFFF;
+    }
+
+    .select-chevron {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text-muted);
+    }
+
+    .new-section-row {
+      display: none;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .new-section-row.active {
+      display: flex;
+    }
+
+    .text-input {
+      flex: 1;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .text-input:focus {
+      border-color: var(--primary);
+      background: #FFFFFF;
+    }
+
+    /* Inbox Header & Action Bar */
+    .inbox-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 0;
+    }
+
+    .inbox-title-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .inbox-heading {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.2px;
+    }
+
+    .count-pill {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      border: 1px solid var(--primary-border);
+    }
+
+    .inbox-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .checkbox-custom {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    .checkbox-custom:checked {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .checkbox-custom:checked::after {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 1px;
+      width: 4px;
+      height: 8px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    /* Inbox Item List */
+    .inbox-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px 16px;
+      background: var(--bg-surface);
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius-lg);
+      gap: 8px;
+    }
+
+    .empty-icon-wrap {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--bg-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+
+    .empty-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .empty-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+      max-width: 220px;
+      line-height: 1.35;
+    }
+
+    /* Screenshot Card */
+    .screenshot-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 7px 10px;
+      transition: all 0.15s ease;
+      position: relative;
+      box-shadow: var(--shadow-xs);
+    }
+    .screenshot-card:hover {
+      border-color: #CBD5E1;
+      box-shadow: var(--shadow-sm);
+    }
+    .screenshot-card.inserted {
+      background: var(--bg-subtle);
+      opacity: 0.75;
+    }
+
+    .thumb-wrapper {
+      width: 42px;
+      height: 58px;
+      border-radius: 5px;
+      background: var(--bg-subtle);
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+      border: 1px solid var(--border-color);
+    }
+
+    .thumb-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .thumb-badge {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      background: rgba(15, 23, 42, 0.75);
+      color: #FFFFFF;
+      font-size: 8px;
+      padding: 1px 3px;
+      border-radius: 2px;
+      font-weight: 600;
+    }
+
+    .item-meta {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .item-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-subtext {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+
+    .badge-downscaled {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      background: var(--warning-bg);
+      color: var(--warning);
+      font-size: 9px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      border: 1px solid var(--warning-border);
+      font-weight: 600;
+    }
+
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .btn-item-insert {
+      background: var(--primary);
+      border: none;
+      color: #FFFFFF;
+      padding: 5px 9px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+      transition: all 0.15s ease;
+    }
+    .btn-item-insert:hover {
+      background: var(--primary-hover);
+    }
+    .btn-item-insert:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Footer / Bottom Actions */
+    .footer {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-color);
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #2563EB, #1D4ED8);
+      border: none;
+      color: #FFFFFF;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: var(--shadow-primary);
+      transition: all 0.15s ease;
+    }
+    .btn-primary:hover:not(:disabled) {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled {
+      background: #E2E8F0;
+      color: #94A3B8;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .footer-subrow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .link-sub {
+      color: var(--primary);
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+    .link-sub:hover {
+      color: var(--primary-hover);
+    }
+
+    /* Settings Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 340px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalSlide 0.2s ease;
+    }
+
+    @keyframes modalSlide {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .modal-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .input-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .modal-footer {
+      padding: 12px 16px;
+      background: var(--bg-page);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 72px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--text-main);
+      color: #FFFFFF;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      z-index: 200;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Icons Helper */
+    .icon {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <div class="logo-badge">
+        <svg class="icon" style="width: 16px; height: 16px;" viewBox="0 0 24 24">
+          <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+      </div>
+      <span class="brand-text">Dumpy</span>
+    </div>
+    <div class="header-actions">
+      <div class="status-pill" id="statusPill" title="Live Supabase sync active">
+        <span class="status-dot"></span>
+        <span id="statusText">Live (1.5s)</span>
+      </div>
+      <button class="icon-btn" id="btnSettings" title="Supabase Settings">
+        <svg class="icon" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Scrollable Area -->
+  <main class="main-content">
+
+    <!-- Mobile Pairing Card -->
+    <div class="card">
+      <div class="pairing-header">
+        <span class="card-title">
+          <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+          Device Pairing
+        </span>
+        <button class="icon-btn" id="btnNewRoom" title="Generate New Room Code">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M23 4v6h-6M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+          </svg>
+        </button>
+      </div>
+      <div class="pairing-container">
+        <div class="qr-box" id="qrContainer" title="Scan with phone camera">
+          <canvas id="qrCanvas" width="180" height="180"></canvas>
+        </div>
+        <div class="pairing-info">
+          <div class="room-code-tag" id="roomCodeDisplay">DMP-....</div>
+          <p class="pairing-desc">Scan to beam mobile screenshots straight into Figma.</p>
+          <div class="pairing-actions">
+            <button class="btn-secondary-sm" id="btnCopyLink">
+              <svg class="icon" viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
+              Copy Link
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Target Selector -->
+    <div class="section-selector">
+      <div class="section-header-row">
+        <span class="card-title">
+          <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+            <polyline points="2 17 12 22 22 17"/>
+            <polyline points="2 12 12 17 22 12"/>
+          </svg>
+          Figma Section Target
+        </span>
+        <button class="icon-btn" id="btnRefreshSections" title="Refresh Page Sections">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l5.67-5.67"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="select-wrapper">
+        <select class="custom-select" id="sectionSelect">
+          <option value="__NEW__">➕ Create New Section...</option>
+          <option value="__FREE__">📌 Free Canvas (No Section)</option>
+        </select>
+        <svg class="icon select-chevron" viewBox="0 0 24 24">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+
+      <div class="new-section-row active" id="newSectionInputRow">
+        <input type="text" class="text-input" id="newSectionNameInput" placeholder="Section Name" value="Mobile Screenshots" />
+      </div>
+    </div>
+
+    <!-- Inbox Header & Actions -->
+    <div class="inbox-bar">
+      <div class="inbox-title-group">
+        <span class="inbox-heading">Inbox</span>
+        <span class="count-pill" id="itemCountPill">0</span>
+      </div>
+      <div class="inbox-controls">
+        <label class="checkbox-label" id="selectAllLabel">
+          <input type="checkbox" class="checkbox-custom" id="selectAllCheckbox" checked>
+          <span>Select All</span>
+        </label>
+        <button class="icon-btn" id="btnClearInbox" title="Clear Inserted Screenshots">
+          <svg class="icon" viewBox="0 0 24 24">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Screenshots List -->
+    <div class="inbox-list" id="inboxList">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon-wrap">
+          <svg class="icon" style="width: 18px; height: 18px;" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div class="empty-text">Inbox is empty</div>
+        <p class="empty-sub">Snap or select screenshots on your paired phone to see them appear here.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer Actions -->
+  <footer class="footer">
+    <button class="btn-primary" id="btnInsertBatch" disabled>
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      <span id="btnInsertText">Insert Selected (0)</span>
+    </button>
+    <div class="footer-subrow">
+      <span id="downscaleNotice">⚡ 4096px downscale guard</span>
+      <span class="link-sub" id="btnManualRefresh">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M23 4v6h-6M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+        Sync
+      </span>
+    </div>
+  </footer>
+
+  <!-- Settings Modal -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          Supabase Settings
+        </div>
+        <button class="icon-btn" id="btnCloseSettings">
+          <svg class="icon" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group">
+          <label class="input-label" for="settingSupabaseUrl">Supabase Project URL</label>
+          <input type="text" class="text-input" id="settingSupabaseUrl" placeholder="https://nivrnksfmkskmjdjzvzb.supabase.co" />
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="settingSupabaseKey">Supabase Anon Key</label>
+          <input type="password" class="text-input" id="settingSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." />
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="settingWebUrl">Vercel Web App URL</label>
+          <input type="text" class="text-input" id="settingWebUrl" placeholder="https://dumpy.vercel.app" value="https://dumpy.vercel.app" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary-sm" id="btnResetSettings">Reset</button>
+        <button class="btn-item-insert" id="btnSaveSettings">Save & Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toastMessage">
+    <svg class="icon" viewBox="0 0 24 24" style="color: #60A5FA;">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+      <polyline points="22 4 12 14.01 9 11.01"/>
+    </svg>
+    <span id="toastText">Link copied to clipboard</span>
+  </div>
+
+  <!-- Rock-Solid Direct 2D Canvas QR Generator (Offline, Instant, Zero API) -->
+  <script>
+    (function(global) {
+      var PAD0 = 0xEC;
+      var PAD1 = 0x11;
+
+      var QRBitBuffer = function() {
+        var buffer = [];
+        var length = 0;
+        return {
+          getBuffer: function() { return buffer; },
+          getAt: function(index) {
+            var bufIndex = Math.floor(index / 8);
+            return ((buffer[bufIndex] >>> (7 - index % 8)) & 1) == 1;
+          },
+          put: function(num, len) {
+            for (var i = 0; i < len; i++) {
+              this.putBit(((num >>> (len - i - 1)) & 1) == 1);
+            }
+          },
+          getLengthInBits: function() { return length; },
+          putBit: function(bit) {
+            var bufIndex = Math.floor(length / 8);
+            if (buffer.length <= bufIndex) buffer.push(0);
+            if (bit) buffer[bufIndex] |= (0x80 >>> (length % 8));
+            length++;
+          }
+        };
+      };
+
+      var QRPolynomial = function(num, shift) {
+        var offset = 0;
+        while (offset < num.length && num[offset] == 0) offset++;
+        var _num = new Array(num.length - offset + shift);
+        for (var i = 0; i < num.length - offset; i++) _num[i] = num[i + offset];
+        return {
+          getAt: function(index) { return _num[index]; },
+          getLength: function() { return _num.length; },
+          multiply: function(e) {
+            var res = new Array(this.getLength() + e.getLength() - 1);
+            for (var i = 0; i < this.getLength(); i++) {
+              for (var j = 0; j < e.getLength(); j++) {
+                res[i + j] ^= QRMath.gexp(QRMath.glog(this.getAt(i)) + QRMath.glog(e.getAt(j)));
+              }
+            }
+            return QRPolynomial(res, 0);
+          },
+          mod: function(e) {
+            if (this.getLength() - e.getLength() < 0) return this;
+            var ratio = QRMath.glog(this.getAt(0)) - QRMath.glog(e.getAt(0));
+            var res = new Array(this.getLength());
+            for (var i = 0; i < this.getLength(); i++) res[i] = this.getAt(i);
+            for (var i = 0; i < e.getLength(); i++) res[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i)) + ratio);
+            return QRPolynomial(res, 0).mod(e);
+          }
+        };
+      };
+
+      var QRMath = {
+        glog: function(n) {
+          if (n < 1) throw new Error('glog(' + n + ')');
+          return QRMath.LOG_TABLE[n];
+        },
+        gexp: function(n) {
+          while (n < 0) n += 255;
+          while (n >= 256) n -= 255;
+          return QRMath.EXP_TABLE[n];
+        },
+        EXP_TABLE: new Array(256),
+        LOG_TABLE: new Array(256)
+      };
+      for (var i = 0; i < 8; i++) QRMath.EXP_TABLE[i] = 1 << i;
+      for (var i = 8; i < 256; i++) QRMath.EXP_TABLE[i] = QRMath.EXP_TABLE[i - 4] ^ QRMath.EXP_TABLE[i - 5] ^ QRMath.EXP_TABLE[i - 6] ^ QRMath.EXP_TABLE[i - 8];
+      for (var i = 0; i < 255; i++) QRMath.LOG_TABLE[QRMath.EXP_TABLE[i]] = i;
+
+      var QRRSBlock = {
+        RS_BLOCK_TABLE: [
+          [1, 26, 19], [1, 26, 16], [1, 26, 13], [1, 26, 9],
+          [1, 44, 34], [1, 44, 28], [1, 44, 22], [1, 44, 16],
+          [1, 70, 55], [1, 70, 44], [2, 35, 17], [2, 35, 13],
+          [1, 100, 80], [2, 50, 32], [2, 50, 24], [4, 25, 9],
+          [1, 134, 108], [2, 67, 43], [2, 33, 15, 2, 34, 16], [2, 33, 11, 2, 34, 12],
+          [2, 86, 68], [4, 43, 27], [4, 43, 19], [4, 43, 15],
+          [2, 98, 78], [4, 49, 31], [2, 32, 14, 4, 33, 15], [4, 39, 13, 1, 40, 14],
+          [2, 121, 97], [2, 60, 38, 2, 61, 39], [4, 40, 18, 2, 41, 19], [4, 40, 14, 2, 41, 15],
+          [2, 146, 116], [3, 58, 36, 2, 59, 37], [4, 36, 16, 4, 37, 17], [4, 36, 12, 4, 37, 13],
+          [2, 86, 68, 2, 87, 69], [4, 69, 43, 1, 70, 44], [6, 43, 19, 2, 44, 20], [6, 43, 15, 2, 44, 16]
+        ],
+        getRSBlocks: function(typeNumber, errorCorrectionLevel) {
+          var rsBlock = this.getRsBlockTable(typeNumber, errorCorrectionLevel);
+          if (typeof rsBlock == 'undefined') throw new Error('bad rs block @ typeNumber:' + typeNumber);
+          var length = rsBlock.length / 3;
+          var list = [];
+          for (var i = 0; i < length; i++) {
+            list.push({ totalCount: rsBlock[i * 3 + 1], dataCount: rsBlock[i * 3 + 2] });
+          }
+          return list;
+        },
+        getRsBlockTable: function(typeNumber, errorCorrectionLevel) {
+          switch (errorCorrectionLevel) {
+            case 1: return this.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0]; // L
+            case 0: return this.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1]; // M
+            case 3: return this.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2]; // Q
+            case 2: return this.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3]; // H
+            default: return undefined;
+          }
+        }
+      };
+
+      var QR8bitByte = function(data) {
+        return {
+          getMode: function() { return 4; },
+          getLength: function() { return data.length; },
+          write: function(buffer) {
+            for (var i = 0; i < data.length; i++) buffer.put(data.charCodeAt(i), 8);
+          }
+        };
+      };
+
+      var QRCodeModel = function(typeNumber, errorCorrectionLevel) {
+        var _modules = null;
+        var _moduleCount = 0;
+        var _dataList = [];
+
+        var createData = function(typeNumber, errorCorrectionLevel, dataList) {
+          var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectionLevel);
+          var buffer = QRBitBuffer();
+          for (var i = 0; i < dataList.length; i++) {
+            var data = dataList[i];
+            buffer.put(data.getMode(), 4);
+            buffer.put(data.getLength(), (typeNumber < 10 ? 8 : 16));
+            data.write(buffer);
+          }
+          var totalDataCount = 0;
+          for (var i = 0; i < rsBlocks.length; i++) totalDataCount += rsBlocks[i].dataCount;
+          if (buffer.getLengthInBits() > totalDataCount * 8) throw new Error('Data overflow');
+          if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) buffer.put(0, 4);
+          while (buffer.getLengthInBits() % 8 != 0) buffer.putBit(false);
+          while (true) {
+            if (buffer.getLengthInBits() >= totalDataCount * 8) break;
+            buffer.put(PAD0, 8);
+            if (buffer.getLengthInBits() >= totalDataCount * 8) break;
+            buffer.put(PAD1, 8);
+          }
+
+          var offset = 0;
+          var maxDcCount = 0;
+          var maxEcCount = 0;
+          var dcdata = new Array(rsBlocks.length);
+          var ecdata = new Array(rsBlocks.length);
+          for (var r = 0; r < rsBlocks.length; r++) {
+            var dcCount = rsBlocks[r].dataCount;
+            var ecCount = rsBlocks[r].totalCount - dcCount;
+            maxDcCount = Math.max(maxDcCount, dcCount);
+            maxEcCount = Math.max(maxEcCount, ecCount);
+            dcdata[r] = new Array(dcCount);
+            for (var i = 0; i < dcdata[r].length; i++) dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset];
+            offset += dcCount;
+            var rsPoly = QRPolynomial([1], 0);
+            for (var i = 0; i < ecCount; i++) rsPoly = rsPoly.multiply(QRPolynomial([1, QRMath.gexp(i)], 0));
+            var rawPoly = QRPolynomial(dcdata[r], rsPoly.getLength() - 1);
+            var modPoly = rawPoly.mod(rsPoly);
+            ecdata[r] = new Array(rsPoly.getLength() - 1);
+            for (var i = 0; i < ecdata[r].length; i++) {
+              var modIndex = i + modPoly.getLength() - ecdata[r].length;
+              ecdata[r][i] = (modIndex >= 0) ? modPoly.getAt(modIndex) : 0;
+            }
+          }
+
+          var totalCodeCount = 0;
+          for (var i = 0; i < rsBlocks.length; i++) totalCodeCount += rsBlocks[i].totalCount;
+          var data = new Array(totalCodeCount);
+          var index = 0;
+          for (var i = 0; i < maxDcCount; i++) {
+            for (var r = 0; r < rsBlocks.length; r++) {
+              if (i < dcdata[r].length) data[index++] = dcdata[r][i];
+            }
+          }
+          for (var i = 0; i < maxEcCount; i++) {
+            for (var r = 0; r < rsBlocks.length; r++) {
+              if (i < ecdata[r].length) data[index++] = ecdata[r][i];
+            }
+          }
+          return data;
+        };
+
+        return {
+          addData: function(data) { _dataList.push(QR8bitByte(data)); },
+          isDark: function(row, col) { return _modules ? _modules[row][col] : false; },
+          getModuleCount: function() { return _moduleCount; },
+          make: function() {
+            if (typeNumber < 1) {
+              for (var t = 1; t <= 10; t++) {
+                try {
+                  typeNumber = t;
+                  this.makeImpl(false, 0);
+                  return;
+                } catch (e) {}
+              }
+              throw new Error('Data too long for QR');
+            }
+            this.makeImpl(false, 0);
+          },
+          makeImpl: function(test, maskPattern) {
+            _moduleCount = typeNumber * 4 + 17;
+            _modules = new Array(_moduleCount);
+            for (var row = 0; row < _moduleCount; row++) {
+              _modules[row] = new Array(_moduleCount);
+              for (var col = 0; col < _moduleCount; col++) _modules[row][col] = null;
+            }
+            this.setupPositionProbePattern(0, 0);
+            this.setupPositionProbePattern(_moduleCount - 7, 0);
+            this.setupPositionProbePattern(0, _moduleCount - 7);
+            for (var r = 8; r < _moduleCount - 8; r++) {
+              if (_modules[r][6] === null) _modules[r][6] = (r % 2 == 0);
+            }
+            for (var c = 8; c < _moduleCount - 8; c++) {
+              if (_modules[6][c] === null) _modules[6][c] = (c % 2 == 0);
+            }
+            this.setupTypeInfo(test, maskPattern);
+            var data = createData(typeNumber, errorCorrectionLevel, _dataList);
+            this.mapData(data, maskPattern);
+          },
+          setupPositionProbePattern: function(row, col) {
+            for (var r = -1; r <= 7; r++) {
+              if (row + r <= -1 || _moduleCount <= row + r) continue;
+              for (var c = -1; c <= 7; c++) {
+                if (col + c <= -1 || _moduleCount <= col + c) continue;
+                if ((0 <= r && r <= 6 && (c == 0 || c == 6)) || (0 <= c && c <= 6 && (r == 0 || r == 6)) || (2 <= r && r <= 4 && 2 <= c && c <= 4)) {
+                  _modules[row + r][col + c] = true;
+                } else {
+                  _modules[row + r][col + c] = false;
+                }
+              }
+            }
+          },
+          setupTypeInfo: function(test, maskPattern) {
+            var data = (errorCorrectionLevel << 3) | maskPattern;
+            var bits = (data << 10);
+            while (bits >= (1 << 10)) {
+              var shift = 0;
+              while ((bits >> (10 + shift)) > 0) shift++;
+              bits ^= (0x537 << (shift - 1));
+            }
+            var typeInfo = ((data << 10) | bits) ^ 0x5412;
+            for (var i = 0; i < 15; i++) {
+              var mod = (!test && ((typeInfo >> i) & 1) == 1);
+              if (i < 6) _modules[i][8] = mod;
+              else if (i < 8) _modules[i + 1][8] = mod;
+              else _modules[_moduleCount - 15 + i][8] = mod;
+
+              if (i < 8) _modules[8][_moduleCount - i - 1] = mod;
+              else if (i < 9) _modules[8][15 - i - 1 + 1] = mod;
+              else _modules[8][15 - i - 1] = mod;
+            }
+            _modules[_moduleCount - 8][8] = !test;
+          },
+          mapData: function(data, maskPattern) {
+            var inc = -1;
+            var row = _moduleCount - 1;
+            var bitIndex = 7;
+            var byteIndex = 0;
+            for (var col = _moduleCount - 1; col > 0; col -= 2) {
+              if (col == 6) col--;
+              while (true) {
+                for (var c = 0; c < 2; c++) {
+                  if (_modules[row][col - c] === null) {
+                    var dark = false;
+                    if (byteIndex < data.length) dark = (((data[byteIndex] >>> bitIndex) & 1) == 1);
+                    if ((row + col - c) % 2 == 0) dark = !dark;
+                    _modules[row][col - c] = dark;
+                    bitIndex--;
+                    if (bitIndex == -1) { byteIndex++; bitIndex = 7; }
+                  }
+                }
+                row += inc;
+                if (row < 0 || _moduleCount <= row) { row -= inc; inc = -inc; break; }
+              }
+            }
+          }
+        };
+      };
+
+      global.drawQRCodeToCanvas = function(canvas, text) {
+        if (!canvas) return;
+        try {
+          var qr = QRCodeModel(0, 1);
+          qr.addData(text);
+          qr.make();
+          var count = qr.getModuleCount();
+          var size = 180;
+          canvas.width = size;
+          canvas.height = size;
+          var ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, size, size);
+          ctx.fillStyle = '#0F172A';
+
+          var margin = 2;
+          var cellSize = size / (count + margin * 2);
+          for (var r = 0; r < count; r++) {
+            for (var c = 0; c < count; c++) {
+              if (qr.isDark(r, c)) {
+                var x = Math.round((c + margin) * cellSize);
+                var y = Math.round((r + margin) * cellSize);
+                var w = Math.ceil(cellSize);
+                var h = Math.ceil(cellSize);
+                ctx.fillRect(x, y, w, h);
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("Canvas QR fallback error:", e);
+        }
+      };
+    })(window);
+  </script>
+
+  <!-- Main Plugin UI Logic -->
+  <script>
+    const cachedRoom = localStorage.getItem('dumpy_room_id');
+    const initialRoom = cachedRoom || ('DMP-' + Math.random().toString(36).substring(2, 7).toUpperCase());
+
+    const state = {
+      roomId: initialRoom,
+      supabaseUrl: localStorage.getItem('dumpy_supabase_url') || 'https://nivrnksfmkskmjdjzvzb.supabase.co',
+      supabaseKey: localStorage.getItem('dumpy_supabase_key') || '',
+      webAppUrl: localStorage.getItem('dumpy_web_url') || 'https://dumpy.vercel.app',
+      pollIntervalId: null,
+      pollFreqMs: 1500,
+      inboxItems: [],
+      selectedIds: new Set(),
+      sections: [],
+      selectedSectionId: '__NEW__',
+      isInserting: false,
+      knownItemIds: new Set()
+    };
+
+    const el = {
+      qrContainer: document.getElementById('qrContainer'),
+      qrCanvas: document.getElementById('qrCanvas'),
+      roomCodeDisplay: document.getElementById('roomCodeDisplay'),
+      btnCopyLink: document.getElementById('btnCopyLink'),
+      btnNewRoom: document.getElementById('btnNewRoom'),
+      sectionSelect: document.getElementById('sectionSelect'),
+      btnRefreshSections: document.getElementById('btnRefreshSections'),
+      newSectionInputRow: document.getElementById('newSectionInputRow'),
+      newSectionNameInput: document.getElementById('newSectionNameInput'),
+      inboxList: document.getElementById('inboxList'),
+      emptyState: document.getElementById('emptyState'),
+      itemCountPill: document.getElementById('itemCountPill'),
+      selectAllCheckbox: document.getElementById('selectAllCheckbox'),
+      btnClearInbox: document.getElementById('btnClearInbox'),
+      btnInsertBatch: document.getElementById('btnInsertBatch'),
+      btnInsertText: document.getElementById('btnInsertText'),
+      btnSettings: document.getElementById('btnSettings'),
+      settingsModal: document.getElementById('settingsModal'),
+      btnCloseSettings: document.getElementById('btnCloseSettings'),
+      settingSupabaseUrl: document.getElementById('settingSupabaseUrl'),
+      settingSupabaseKey: document.getElementById('settingSupabaseKey'),
+      settingWebUrl: document.getElementById('settingWebUrl'),
+      btnSaveSettings: document.getElementById('btnSaveSettings'),
+      btnResetSettings: document.getElementById('btnResetSettings'),
+      btnManualRefresh: document.getElementById('btnManualRefresh'),
+      statusPill: document.getElementById('statusPill'),
+      statusText: document.getElementById('statusText'),
+      toastMessage: document.getElementById('toastMessage'),
+      toastText: document.getElementById('toastText')
+    };
+
+    function generateRoomCode() {
+      const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+      let code = '';
+      for (let i = 0; i < 5; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return 'DMP-' + code;
+    }
+
+    function showToast(msg, duration = 2400) {
+      el.toastText.textContent = msg;
+      el.toastMessage.classList.add('show');
+      setTimeout(() => el.toastMessage.classList.remove('show'), duration);
+    }
+
+    function formatTimeAgo(dateStr) {
+      const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
+      if (seconds < 5) return 'just now';
+      if (seconds < 60) return `${seconds}s ago`;
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.floor(minutes / 60);
+      return `${hours}h ago`;
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes || bytes === 0) return '0 KB';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    // Render QR Code immediately onto canvas with fallback
+    function updatePairingUI() {
+      const pairingUrl = `${state.webAppUrl}?room=${encodeURIComponent(state.roomId)}`;
+      el.roomCodeDisplay.textContent = state.roomId;
+      
+      try {
+        let canvas = document.getElementById('qrCanvas');
+        if (!canvas) {
+          canvas = document.createElement('canvas');
+          canvas.id = 'qrCanvas';
+          canvas.width = 180;
+          canvas.height = 180;
+          el.qrContainer.innerHTML = '';
+          el.qrContainer.appendChild(canvas);
+        }
+        window.drawQRCodeToCanvas(canvas, pairingUrl);
+      } catch (e) {
+        console.warn("Direct canvas QR draw failed, using image fallback:", e);
+        el.qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(pairingUrl)}&color=0F172A" alt="QR" />`;
+      }
+    }
+
+    function updateSectionSelect() {
+      const currentVal = el.sectionSelect.value;
+      el.sectionSelect.innerHTML = `
+        <option value="__NEW__">➕ Create New Section...</option>
+        <option value="__FREE__">📌 Free Canvas (No Section)</option>
+      `;
+
+      state.sections.forEach(sec => {
+        const opt = document.createElement('option');
+        opt.value = sec.id;
+        opt.textContent = `📁 ${sec.name}`;
+        el.sectionSelect.appendChild(opt);
+      });
+
+      if (state.sections.some(s => s.id === currentVal)) {
+        el.sectionSelect.value = currentVal;
+      } else {
+        el.sectionSelect.value = '__NEW__';
+      }
+      
+      toggleNewSectionRow();
+    }
+
+    function toggleNewSectionRow() {
+      if (el.sectionSelect.value === '__NEW__') {
+        el.newSectionInputRow.classList.add('active');
+      } else {
+        el.newSectionInputRow.classList.remove('active');
+      }
+    }
+
+    // Offscreen Canvas Downscaler: Check if width or height exceeds 4096px
+    async function fetchAndDownscaleImage(imageUrl) {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await fetch(imageUrl);
+          if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+          const blob = await response.blob();
+          
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = async () => {
+            const maxDim = 4096;
+            let width = img.naturalWidth || img.width;
+            let height = img.naturalHeight || img.height;
+            let wasDownscaled = false;
+
+            if (width > maxDim || height > maxDim) {
+              wasDownscaled = true;
+              if (width > height) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob(async (scaledBlob) => {
+              if (!scaledBlob) {
+                reject(new Error("Canvas blob conversion failed"));
+                return;
+              }
+              const buffer = await scaledBlob.arrayBuffer();
+              resolve({
+                bytes: Array.from(new Uint8Array(buffer)),
+                width: width,
+                height: height,
+                wasDownscaled: wasDownscaled
+              });
+            }, 'image/jpeg', 0.94);
+          };
+          img.onerror = () => reject(new Error("Image failed to decode"));
+          img.src = URL.createObjectURL(blob);
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+
+    function renderInboxList() {
+      el.itemCountPill.textContent = state.inboxItems.length;
+
+      if (state.inboxItems.length === 0) {
+        el.inboxList.innerHTML = '';
+        el.inboxList.appendChild(el.emptyState);
+        el.btnInsertBatch.disabled = true;
+        el.btnInsertText.textContent = `Insert Selected (0)`;
+        return;
+      }
+
+      if (el.inboxList.contains(el.emptyState)) {
+        el.inboxList.removeChild(el.emptyState);
+      }
+
+      el.inboxList.innerHTML = '';
+
+      state.inboxItems.forEach(item => {
+        const isSelected = state.selectedIds.has(item.id);
+        const card = document.createElement('div');
+        card.className = `screenshot-card ${item.is_inserted ? 'inserted' : ''}`;
+        card.id = `item-${item.id}`;
+
+        const isLarge = (item.width > 4096 || item.height > 4096);
+        const dimStr = item.width && item.height ? `${item.width}×${item.height}` : 'Mobile';
+        const timeAgo = formatTimeAgo(item.created_at);
+        const sizeStr = formatBytes(item.file_size);
+
+        card.innerHTML = `
+          <input type="checkbox" class="checkbox-custom item-checkbox" data-id="${item.id}" ${isSelected ? 'checked' : ''} />
+          <div class="thumb-wrapper">
+            <img src="${item.file_url}" class="thumb-img" alt="${item.file_name}" loading="lazy" />
+            <span class="thumb-badge">${dimStr.split('×')[0]}w</span>
+          </div>
+          <div class="item-meta">
+            <div class="item-title" title="${item.file_name}">${item.file_name}</div>
+            <div class="item-subtext">
+              <span>${timeAgo}</span>
+              <span>•</span>
+              <span>${sizeStr}</span>
+              ${isLarge ? '<span class="badge-downscaled">4096px</span>' : ''}
+              ${item.is_inserted ? '<span style="color:var(--success); font-weight:600;">✓ Inserted</span>' : ''}
+            </div>
+          </div>
+          <div class="item-actions">
+            <button class="btn-item-insert btn-single-insert" data-id="${item.id}" title="Insert into Figma">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              Insert
+            </button>
+            <button class="icon-btn btn-single-delete" data-id="${item.id}" title="Delete screenshot">
+              <svg class="icon" viewBox="0 0 24 24">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+            </button>
+          </div>
+        `;
+
+        card.querySelector('.item-checkbox').addEventListener('change', (e) => {
+          if (e.target.checked) {
+            state.selectedIds.add(item.id);
+          } else {
+            state.selectedIds.delete(item.id);
+          }
+          updateBatchButtonState();
+        });
+
+        card.querySelector('.btn-single-insert').addEventListener('click', async () => {
+          await insertSingleItem(item);
+        });
+
+        card.querySelector('.btn-single-delete').addEventListener('click', async () => {
+          await deleteItem(item.id);
+        });
+
+        el.inboxList.appendChild(card);
+      });
+
+      updateBatchButtonState();
+    }
+
+    function updateBatchButtonState() {
+      const selectedCount = state.selectedIds.size;
+      el.btnInsertBatch.disabled = (selectedCount === 0 || state.isInserting);
+      el.btnInsertText.textContent = selectedCount > 0 
+        ? `Insert Selected (${selectedCount})` 
+        : `Insert All (${state.inboxItems.length})`;
+      
+      el.selectAllCheckbox.checked = (state.inboxItems.length > 0 && selectedCount === state.inboxItems.length);
+    }
+
+    async function pollInbox() {
+      if (!state.supabaseUrl || !state.supabaseKey || !state.roomId) return;
+
+      try {
+        const queryUrl = `${state.supabaseUrl}/rest/v1/dumpy_screenshots?room_id=eq.${encodeURIComponent(state.roomId)}&order=created_at.desc&limit=50`;
+        const res = await fetch(queryUrl, {
+          headers: {
+            'apikey': state.supabaseKey,
+            'Authorization': `Bearer ${state.supabaseKey}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!res.ok) {
+          el.statusPill.style.borderColor = 'var(--danger-border)';
+          el.statusPill.style.background = 'var(--danger-bg)';
+          el.statusText.textContent = 'Auth Error';
+          return;
+        }
+
+        const data = await res.json();
+        
+        let hasNewArrival = false;
+        data.forEach(item => {
+          if (!state.knownItemIds.has(item.id)) {
+            state.knownItemIds.add(item.id);
+            state.selectedIds.add(item.id);
+            hasNewArrival = true;
+          }
+        });
+
+        if (hasNewArrival && state.inboxItems.length > 0) {
+          showToast(`✨ New screenshot arrived!`);
+        }
+
+        state.inboxItems = data;
+        el.statusPill.style.borderColor = 'var(--success-border)';
+        el.statusPill.style.background = 'var(--success-bg)';
+        el.statusText.textContent = 'Live (1.5s)';
+
+        renderInboxList();
+      } catch (err) {
+        console.warn("Polling error:", err);
+        el.statusText.textContent = 'Reconnecting';
+      }
+    }
+
+    function startPolling() {
+      if (state.pollIntervalId) clearInterval(state.pollIntervalId);
+      pollInbox();
+      state.pollIntervalId = setInterval(pollInbox, state.pollFreqMs);
+    }
+
+    async function insertSingleItem(item) {
+      if (state.isInserting) return;
+      state.isInserting = true;
+      showToast(`Preparing ${item.file_name}...`);
+
+      try {
+        const processed = await fetchAndDownscaleImage(item.file_url);
+        
+        let sectionId = el.sectionSelect.value;
+        if (sectionId === '__NEW__') {
+          const customName = el.newSectionNameInput.value.trim() || "Mobile Screenshots";
+          parent.postMessage({
+            pluginMessage: {
+              type: "CREATE_SECTION",
+              name: customName
+            }
+          }, '*');
+          await new Promise(r => setTimeout(r, 100));
+        }
+
+        parent.postMessage({
+          pluginMessage: {
+            type: "INSERT_SINGLE_IMAGE",
+            id: item.id,
+            name: item.file_name,
+            bytes: processed.bytes,
+            width: processed.width,
+            height: processed.height,
+            sectionId: (sectionId !== '__NEW__' && sectionId !== '__FREE__') ? sectionId : null
+          }
+        }, '*');
+
+        await markInserted([item.id]);
+      } catch (err) {
+        console.error("Insert error:", err);
+        showToast(`Insert failed: ${err.message}`);
+      } finally {
+        state.isInserting = false;
+        updateBatchButtonState();
+      }
+    }
+
+    async function insertBatchItems() {
+      if (state.isInserting) return;
+      const targetItems = state.inboxItems.filter(item => state.selectedIds.has(item.id));
+      if (targetItems.length === 0) {
+        showToast("Select at least 1 screenshot to insert");
+        return;
+      }
+
+      state.isInserting = true;
+      el.btnInsertBatch.disabled = true;
+      el.btnInsertText.textContent = `Processing ${targetItems.length} images...`;
+
+      try {
+        const processedList = [];
+        for (let i = 0; i < targetItems.length; i++) {
+          const item = targetItems[i];
+          el.btnInsertText.textContent = `Processing (${i + 1}/${targetItems.length})...`;
+          const result = await fetchAndDownscaleImage(item.file_url);
+          processedList.push({
+            id: item.id,
+            name: item.file_name,
+            bytes: result.bytes,
+            width: result.width,
+            height: result.height
+          });
+        }
+
+        const sectionMode = el.sectionSelect.value;
+        const newSecName = el.newSectionNameInput.value.trim() || `Mobile Screenshots (${state.roomId})`;
+
+        parent.postMessage({
+          pluginMessage: {
+            type: "INSERT_BATCH",
+            items: processedList,
+            sectionId: (sectionMode !== '__NEW__' && sectionMode !== '__FREE__') ? sectionMode : null,
+            newSectionName: newSecName,
+            columns: 3
+          }
+        }, '*');
+
+        await markInserted(targetItems.map(i => i.id));
+        showToast(`✨ ${targetItems.length} screenshots placed in grid!`);
+      } catch (err) {
+        console.error("Batch insert error:", err);
+        showToast(`Batch failed: ${err.message}`);
+      } finally {
+        state.isInserting = false;
+        updateBatchButtonState();
+      }
+    }
+
+    async function markInserted(ids) {
+      if (!state.supabaseUrl || !state.supabaseKey || ids.length === 0) return;
+      try {
+        for (const id of ids) {
+          await fetch(`${state.supabaseUrl}/rest/v1/dumpy_screenshots?id=eq.${id}`, {
+            method: 'PATCH',
+            headers: {
+              'apikey': state.supabaseKey,
+              'Authorization': `Bearer ${state.supabaseKey}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({ is_inserted: true })
+          });
+        }
+        pollInbox();
+      } catch (e) {
+        console.error("Mark inserted error:", e);
+      }
+    }
+
+    async function deleteItem(id) {
+      try {
+        await fetch(`${state.supabaseUrl}/rest/v1/dumpy_screenshots?id=eq.${id}`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': state.supabaseKey,
+            'Authorization': `Bearer ${state.supabaseKey}`
+          }
+        });
+        state.inboxItems = state.inboxItems.filter(it => it.id !== id);
+        state.selectedIds.delete(id);
+        renderInboxList();
+        showToast("Screenshot deleted");
+      } catch (e) {
+        console.error("Delete error:", e);
+      }
+    }
+
+    async function clearInsertedItems() {
+      const inserted = state.inboxItems.filter(it => it.is_inserted);
+      if (inserted.length === 0) {
+        showToast("No inserted items to clear");
+        return;
+      }
+
+      for (const item of inserted) {
+        await deleteItem(item.id);
+      }
+      showToast(`Cleared ${inserted.length} items`);
+    }
+
+    // Event Listeners
+    el.btnCopyLink.addEventListener('click', () => {
+      const url = `${state.webAppUrl}?room=${encodeURIComponent(state.roomId)}`;
+      navigator.clipboard.writeText(url).then(() => {
+        showToast("📋 Link copied to clipboard!");
+      }).catch(() => {
+        showToast("Room URL: " + url);
+      });
+    });
+
+    el.btnNewRoom.addEventListener('click', () => {
+      state.roomId = generateRoomCode();
+      state.knownItemIds.clear();
+      state.selectedIds.clear();
+      state.inboxItems = [];
+      localStorage.setItem('dumpy_room_id', state.roomId);
+      updatePairingUI();
+      renderInboxList();
+      parent.postMessage({
+        pluginMessage: { type: "SAVE_STORAGE", key: "dumpy_room_id", value: state.roomId }
+      }, '*');
+      showToast(`New room: ${state.roomId}`);
+      startPolling();
+    });
+
+    el.sectionSelect.addEventListener('change', () => {
+      toggleNewSectionRow();
+      parent.postMessage({
+        pluginMessage: { type: "SAVE_STORAGE", key: "dumpy_preferred_section_id", value: el.sectionSelect.value }
+      }, '*');
+    });
+
+    el.btnRefreshSections.addEventListener('click', () => {
+      parent.postMessage({ pluginMessage: { type: "GET_SECTIONS" } }, '*');
+      showToast("Refreshed Figma sections");
+    });
+
+    el.selectAllCheckbox.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        state.inboxItems.forEach(it => state.selectedIds.add(it.id));
+      } else {
+        state.selectedIds.clear();
+      }
+      renderInboxList();
+    });
+
+    el.btnClearInbox.addEventListener('click', clearInsertedItems);
+    el.btnInsertBatch.addEventListener('click', insertBatchItems);
+    el.btnManualRefresh.addEventListener('click', () => {
+      pollInbox();
+      showToast("Synced with Supabase");
+    });
+
+    // Settings Modal
+    el.btnSettings.addEventListener('click', () => {
+      el.settingSupabaseUrl.value = state.supabaseUrl;
+      el.settingSupabaseKey.value = state.supabaseKey;
+      el.settingWebUrl.value = state.webAppUrl;
+      el.settingsModal.classList.add('open');
+    });
+
+    el.btnCloseSettings.addEventListener('click', () => {
+      el.settingsModal.classList.remove('open');
+    });
+
+    el.btnSaveSettings.addEventListener('click', () => {
+      state.supabaseUrl = el.settingSupabaseUrl.value.trim().replace(/\/$/, '') || 'https://nivrnksfmkskmjdjzvzb.supabase.co';
+      state.supabaseKey = el.settingSupabaseKey.value.trim();
+      state.webAppUrl = el.settingWebUrl.value.trim().replace(/\/$/, '') || 'https://dumpy.vercel.app';
+
+      parent.postMessage({
+        pluginMessage: { type: "SAVE_STORAGE", key: "dumpy_supabase_url", value: state.supabaseUrl }
+      }, '*');
+      parent.postMessage({
+        pluginMessage: { type: "SAVE_STORAGE", key: "dumpy_supabase_key", value: state.supabaseKey }
+      }, '*');
+
+      localStorage.setItem('dumpy_supabase_url', state.supabaseUrl);
+      localStorage.setItem('dumpy_supabase_key', state.supabaseKey);
+      localStorage.setItem('dumpy_web_url', state.webAppUrl);
+
+      updatePairingUI();
+      el.settingsModal.classList.remove('open');
+      showToast("Supabase credentials saved!");
+      startPolling();
+    });
+
+    el.btnResetSettings.addEventListener('click', () => {
+      el.settingSupabaseUrl.value = 'https://nivrnksfmkskmjdjzvzb.supabase.co';
+      el.settingSupabaseKey.value = '';
+      el.settingWebUrl.value = 'https://dumpy.vercel.app';
+    });
+
+    // Handle messages from Figma sandbox (code.js)
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (!msg) return;
+
+      switch (msg.type) {
+        case "INIT_RESPONSE": {
+          if (msg.savedRoomId) {
+            state.roomId = msg.savedRoomId;
+          }
+          if (msg.savedSupabaseUrl) {
+            state.supabaseUrl = msg.savedSupabaseUrl;
+          }
+          if (msg.savedSupabaseKey) {
+            state.supabaseKey = msg.savedSupabaseKey;
+          }
+          state.sections = msg.sections || [];
+
+          if (msg.savedSectionId) {
+            state.selectedSectionId = msg.savedSectionId;
+          }
+
+          updatePairingUI();
+          updateSectionSelect();
+          startPolling();
+          break;
+        }
+
+        case "SECTIONS_LIST": {
+          state.sections = msg.sections || [];
+          updateSectionSelect();
+          break;
+        }
+
+        case "SECTION_CREATED": {
+          state.sections = msg.sections || [];
+          updateSectionSelect();
+          el.sectionSelect.value = msg.sectionId;
+          toggleNewSectionRow();
+          break;
+        }
+
+        case "IMAGE_INSERTED": {
+          const item = state.inboxItems.find(it => it.id === msg.id);
+          if (item) item.is_inserted = true;
+          renderInboxList();
+          break;
+        }
+
+        case "BATCH_INSERTED": {
+          if (msg.insertedIds) {
+            state.inboxItems.forEach(it => {
+              if (msg.insertedIds.includes(it.id)) {
+                it.is_inserted = true;
+              }
+            });
+            state.selectedIds.clear();
+            renderInboxList();
+          }
+          break;
+        }
+      }
+    };
+
+    // Synchronous immediate draw on line 1 of script boot
+    updatePairingUI();
+    updateSectionSelect();
+    startPolling();
+
+    // Send IPC INIT to Figma Sandbox
+    parent.postMessage({ pluginMessage: { type: "INIT" } }, '*');
+  </script>
+</body>
+</html>
