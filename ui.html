@@ -1069,7 +1069,7 @@
         </div>
         <div class="input-group">
           <label class="input-label" for="settingWebUrl">Vercel Web App URL</label>
-          <input type="text" class="text-input" id="settingWebUrl" placeholder="https://dumpy.vercel.app" value="https://dumpy.vercel.app" />
+          <input type="text" class="text-input" id="settingWebUrl" placeholder="https://dumpy-figma-plugin.vercel.app" value="https://dumpy-figma-plugin.vercel.app" />
         </div>
       </div>
       <div class="modal-footer">
@@ -1138,7 +1138,11 @@
       currentUser: null,
       supabaseUrl: safeStorage.getItem('dumpy_supabase_url') || 'https://nivrnksfmkskmjdjzvzb.supabase.co',
       supabaseKey: safeStorage.getItem('dumpy_supabase_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pdnJua3NmbWtza21qZGp6dnpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxODA1NzMsImV4cCI6MjEwNTc1NjU3M30.UycIKgNMXCtoMVkrqfEbia5g2o_c6edwp1iwtIcTIO4',
-      webAppUrl: safeStorage.getItem('dumpy_web_url') || 'https://dumpy.vercel.app',
+      webAppUrl: (function() {
+        const saved = safeStorage.getItem('dumpy_web_url');
+        if (saved && saved !== 'https://dumpy.vercel.app' && !saved.includes('dumpy.vercel.app/')) return saved;
+        return 'https://dumpy-figma-plugin.vercel.app';
+      })(),
       pollIntervalId: null,
       pollFreqMs: 1500,
       inboxItems: [],
@@ -1837,7 +1841,7 @@
     el.btnSaveSettings.addEventListener('click', () => {
       state.supabaseUrl = el.settingSupabaseUrl.value.trim().replace(/\/$/, '') || 'https://nivrnksfmkskmjdjzvzb.supabase.co';
       state.supabaseKey = el.settingSupabaseKey.value.trim() || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pdnJua3NmbWtza21qZGp6dnpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxODA1NzMsImV4cCI6MjEwNTc1NjU3M30.UycIKgNMXCtoMVkrqfEbia5g2o_c6edwp1iwtIcTIO4';
-      state.webAppUrl = el.settingWebUrl.value.trim().replace(/\/$/, '') || 'https://dumpy.vercel.app';
+      state.webAppUrl = el.settingWebUrl.value.trim().replace(/\/$/, '') || 'https://dumpy-figma-plugin.vercel.app';
 
       parent.postMessage({
         pluginMessage: { type: "SAVE_STORAGE", key: "dumpy_supabase_url", value: state.supabaseUrl }
@@ -1859,7 +1863,7 @@
     el.btnResetSettings.addEventListener('click', () => {
       el.settingSupabaseUrl.value = 'https://nivrnksfmkskmjdjzvzb.supabase.co';
       el.settingSupabaseKey.value = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pdnJua3NmbWtza21qZGp6dnpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxODA1NzMsImV4cCI6MjEwNTc1NjU3M30.UycIKgNMXCtoMVkrqfEbia5g2o_c6edwp1iwtIcTIO4';
-      el.settingWebUrl.value = 'https://dumpy.vercel.app';
+      el.settingWebUrl.value = 'https://dumpy-figma-plugin.vercel.app';
     });
 
     // Handle messages from Figma sandbox (code.js)

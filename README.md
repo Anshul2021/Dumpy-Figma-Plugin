@@ -87,7 +87,7 @@ sequenceDiagram
     Designer->>Plugin: Opens Plugin
     Plugin->>Plugin: Generates Room Code (e.g. DMP-9X2L) & QR Code
     PhoneUser->>Plugin: Scans QR Code with Phone Camera
-    Plugin-->>Mobile: Opens https://dumpy.vercel.app?room=DMP-9X2L
+    Plugin-->>Mobile: Opens https://dumpy-figma-plugin.vercel.app/web/index.html?room=DMP-9X2L
     PhoneUser->>Mobile: Selects 5 Mobile Screenshots
     Mobile->>Supabase: Direct POST to Storage Bucket ('dumpy-screenshots')
     Mobile->>Supabase: Direct POST to 'dumpy_screenshots' Table

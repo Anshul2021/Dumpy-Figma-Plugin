@@ -122,7 +122,7 @@
       u.searchParams.set('room', state.roomId);
       return u.toString().split('#')[0];
     }
-    return `https://dumpy.vercel.app/web/index.html?room=${encodeURIComponent(state.roomId)}`;
+    return `https://dumpy-figma-plugin.vercel.app/web/index.html?room=${encodeURIComponent(state.roomId)}`;
   }
 
   function updatePairingUI() {
@@ -303,7 +303,7 @@
     if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
       return window.location.href.split('#')[0];
     }
-    const base = 'https://dumpy.vercel.app/web/index.html';
+    const base = 'https://dumpy-figma-plugin.vercel.app/web/index.html';
     return state.roomId ? `${base}?room=${encodeURIComponent(state.roomId)}` : base;
   }
 
