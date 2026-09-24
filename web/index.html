@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#F8FAFC">
-  <title>Dumpy — Real-Time Mobile Screenshot Inbox</title>
+  <title>Dumpy — Mobile Screenshot Inbox</title>
   
   <!-- DM Sans Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,10 +17,11 @@
 </head>
 <body>
 
+  <!-- Subtle Ambient Glow Background -->
   <div class="app-background-glow"></div>
 
   <div class="app-wrapper">
-    <!-- Top App Header -->
+    <!-- Header -->
     <header class="app-header">
       <div class="brand-wrap">
         <div class="brand-icon">
@@ -30,7 +31,7 @@
         </div>
         <div class="brand-text-group">
           <span class="brand-title">Dumpy</span>
-          <span class="brand-badge">Mobile Uploader</span>
+          <span class="brand-badge">Inbox Beam</span>
         </div>
       </div>
 
@@ -49,7 +50,7 @@
       <div class="room-details">
         <div class="room-caption">
           <span class="live-dot"></span>
-          <span>Connected Room</span>
+          <span>Connected Figma Room</span>
         </div>
         <div class="room-code-badge" id="roomCodeDisplay" title="Tap to copy Room Code">
           <span class="room-code-text">DMP-.....</span>
@@ -79,12 +80,12 @@
       </div>
     </div>
 
-    <!-- Collapsible QR Code Card for pairing second phone -->
+    <!-- Collapsible Secondary Device QR Card -->
     <div class="qr-pairing-card" id="webQRCard" style="display: none;">
       <div class="qr-canvas-wrapper" id="webQrContainer"></div>
       <div class="qr-pairing-meta">
-        <div class="qr-pairing-title">Pair Another Device</div>
-        <p class="qr-pairing-desc">Scan with another phone camera to upload screenshots to this same Figma canvas.</p>
+        <div class="qr-pairing-title">Pair Another Phone</div>
+        <p class="qr-pairing-desc">Scan with another phone to beam screenshots directly into this same Figma workspace.</p>
         <button class="btn-copy-link" id="btnCopyWebLink">
           <svg class="icon" viewBox="0 0 24 24">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -95,9 +96,8 @@
       </div>
     </div>
 
-    <!-- Hero Interactive Dropzone & Status Card -->
+    <!-- Hero Interactive Dropzone Card (Opens Photo Library on Tap or Accepts Drops) -->
     <div class="upload-card" id="uploadCard" role="button" tabindex="0" title="Tap to select photos or drop files here">
-      <input type="file" id="fileInput" class="hidden-input" accept="image/*" multiple />
       <div class="upload-pulse-ring"></div>
       <div class="upload-icon-halo">
         <svg class="icon upload-arrow-icon" viewBox="0 0 24 24">
@@ -107,16 +107,14 @@
         </svg>
       </div>
       <div class="upload-instructions">
-        <div class="upload-title">Beam Screenshots to Figma</div>
-        <div class="upload-subtitle">Tap Camera or Gallery below to upload instantly</div>
+        <div class="upload-title">Beam Photos to Figma</div>
+        <div class="upload-subtitle">Tap here to choose screenshots or drop files</div>
       </div>
     </div>
 
-    <!-- Primary Quick Actions: Camera & Gallery Cards -->
+    <!-- Explicit Quick Action Buttons: Camera & Photo Library -->
     <div class="action-grid">
-      <input type="file" id="cameraInput" class="hidden-input" accept="image/*" capture="environment" />
-      
-      <!-- Take Photo Action Card -->
+      <!-- Take Photo Action Button -->
       <button class="action-card action-card-camera" id="btnCamera" type="button">
         <div class="action-card-glow"></div>
         <div class="action-card-icon-wrap">
@@ -131,7 +129,7 @@
         </div>
       </button>
 
-      <!-- Photo Library Action Card -->
+      <!-- Photo Library Action Button -->
       <button class="action-card action-card-gallery" id="btnGallery" type="button">
         <div class="action-card-glow"></div>
         <div class="action-card-icon-wrap">
@@ -143,7 +141,7 @@
         </div>
         <div class="action-card-text">
           <span class="action-card-title">Photo Library</span>
-          <span class="action-card-sub">Choose multiple screenshots</span>
+          <span class="action-card-sub">Choose multiple photos</span>
         </div>
       </button>
     </div>
@@ -156,6 +154,12 @@
       </div>
       <div class="queue-list" id="queueList"></div>
     </div>
+  </div>
+
+  <!-- Dedicated Isolated Hidden File Inputs (Zero Pointer Overlap) -->
+  <div style="display: none; visibility: hidden; position: fixed; pointer-events: none; width: 0; height: 0; overflow: hidden;" aria-hidden="true">
+    <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/heic,image/heif,image/*" multiple />
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" />
   </div>
 
   <!-- Room Switching Modal -->

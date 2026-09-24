@@ -1,6 +1,6 @@
 /* ==============================================================================
    DUMPY Mobile Web Uploader — Modern, Minimal & High-End Design System
-   Typography: DM Sans Exclusively | Light Mode Sapphire Theme
+   Typography: DM Sans Exclusively | Clean Sapphire Indigo Palette
    ============================================================================== */
 
 :root {
@@ -18,7 +18,7 @@
   --primary-gradient-glow: linear-gradient(135deg, rgba(37, 99, 235, 0.9) 0%, rgba(29, 78, 216, 0.9) 100%);
   --primary-light: #EFF6FF;
   --primary-border: #BFDBFE;
-  --primary-glow: rgba(37, 99, 235, 0.2);
+  --primary-glow: rgba(37, 99, 235, 0.18);
   
   /* Status Colors */
   --success: #059669;
@@ -99,6 +99,19 @@ body {
   z-index: 1;
 }
 
+/* SVG Icon Base */
+.icon {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 /* Header */
 .app-header {
   display: flex;
@@ -128,9 +141,6 @@ body {
 .brand-icon .icon {
   width: 20px;
   height: 20px;
-  stroke: currentColor;
-  stroke-width: 2;
-  fill: none;
 }
 
 .brand-text-group {
@@ -188,9 +198,6 @@ body {
 .btn-icon .icon {
   width: 18px;
   height: 18px;
-  stroke: currentColor;
-  stroke-width: 2;
-  fill: none;
 }
 
 /* Room Status Banner */
@@ -268,9 +275,7 @@ body {
   width: 13px;
   height: 13px;
   stroke: var(--primary);
-  stroke-width: 2;
-  fill: none;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 .room-banner-actions {
@@ -305,12 +310,9 @@ body {
 .btn-subtle-action .icon {
   width: 14px;
   height: 14px;
-  stroke: currentColor;
-  stroke-width: 2;
-  fill: none;
 }
 
-/* QR Code Pairing Card */
+/* Secondary Device QR Code Card */
 .qr-pairing-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -390,9 +392,6 @@ body {
 .btn-copy-link .icon {
   width: 13px;
   height: 13px;
-  stroke: currentColor;
-  stroke-width: 2;
-  fill: none;
 }
 
 /* Hero Dropzone Card */
@@ -412,6 +411,7 @@ body {
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
+  user-select: none;
 }
 
 .upload-card:hover {
@@ -422,7 +422,7 @@ body {
 }
 
 .upload-card:active {
-  transform: scale(0.99);
+  transform: scale(0.985);
 }
 
 .upload-card.drag-over {
@@ -464,9 +464,7 @@ body {
 .upload-arrow-icon {
   width: 24px;
   height: 24px;
-  stroke: currentColor;
   stroke-width: 2.2;
-  fill: none;
 }
 
 .upload-instructions {
@@ -490,22 +488,12 @@ body {
   line-height: 1.35;
 }
 
-.hidden-input {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-  z-index: 2;
-}
-
-/* Primary Action Grid (Camera & Photo Library Cards) */
+/* Primary Action Grid (Camera & Photo Library Buttons) */
 .action-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  position: relative;
 }
 
 .action-card {
@@ -521,6 +509,8 @@ body {
   overflow: hidden;
   text-align: left;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  width: 100%;
 }
 
 .action-card:active {
@@ -595,9 +585,6 @@ body {
 .action-card-icon-wrap .icon {
   width: 20px;
   height: 20px;
-  stroke: currentColor;
-  stroke-width: 2;
-  fill: none;
 }
 
 .action-card-text {

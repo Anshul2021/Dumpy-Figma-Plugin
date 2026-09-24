@@ -342,23 +342,36 @@
   // Fixed Upload Flow: Main card and shutter button DO NOT trigger inputs directly
   // They're just visual indicators. Users must explicitly click Camera or Gallery buttons.
   
-  // Remove direct triggers - upload card is now just informational
-  el.uploadCard.addEventListener('click', (e) => {
-    // Show a hint toast instead of triggering upload
-    showToast('📸 Choose Camera or Gallery below to upload');
+  // Hero dropzone tap triggers photo library selection directly
+  el.uploadCard.addEventListener('click', () => {
+    triggerHaptic();
+    el.fileInput.click();
   });
 
-  // File input handlers - only triggered by explicit button clicks
-  el.fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-  el.cameraInput.addEventListener('change', (e) => handleFiles(e.target.files));
+  // File input change handlers with value reset
+  el.fileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleFiles(e.target.files);
+    }
+    e.target.value = '';
+  });
 
-  // Explicit action buttons - these are the ONLY ways to trigger upload
-  el.btnCamera.addEventListener('click', () => {
+  el.cameraInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleFiles(e.target.files);
+    }
+    e.target.value = '';
+  });
+
+  // Dedicated Action Buttons
+  el.btnCamera.addEventListener('click', (e) => {
+    e.stopPropagation();
     triggerHaptic();
     el.cameraInput.click();
   });
   
-  el.btnGallery.addEventListener('click', () => {
+  el.btnGallery.addEventListener('click', (e) => {
+    e.stopPropagation();
     triggerHaptic();
     el.fileInput.click();
   });
