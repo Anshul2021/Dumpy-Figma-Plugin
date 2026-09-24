@@ -24,6 +24,20 @@ CREATE TABLE IF NOT EXISTS public.dumpy_screenshots (
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Ensure all columns exist if migrating from older schema versions
+ALTER TABLE public.dumpy_screenshots ADD COLUMN IF NOT EXISTS device_id TEXT DEFAULT NULL;
+ALTER TABLE public.dumpy_screenshots ADD COLUMN IF NOT EXISTS client_ip TEXT DEFAULT NULL;
+ALTER TABLE public.dumpy_screenshots ADD COLUMN IF NOT EXISTS file_name TEXT DEFAULT '';
+ALTER TABLE public.dumpy_screenshots ADD COLUMN IF NOT EXISTS file_url TEXT DEFAULT '';
+ALTER TABLE public.dumpy_screenshots ADD COLUMN IF NOT EXISTS storage_path TEXT DEFAULT '';
+ALTER TABLE public.dumpy_screenshots ADD COLUMN IF NOT EXISTS file_size BIGINT DEFAULT 0;
+ALTER TABLE public.dumpy_screenshots ADD COLUMN IF NOT EXISTS mime_type TEXT DEFAULT 'image/png';
+ALTER TABLE public.dumpy_screenshots ADD COLUMN IF NOT EXISTS is_inserted BOOLEAN DEFAULT false;
+ALTER TABLE public.dumpy_screenshots ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
+
+-- Reload PostgREST schema cache
+NOTIFY pgrst, 'reload schema';
+
 -- 3. High-Performance Indexes for Sub-50ms Live Inbox Polling
 CREATE INDEX IF NOT EXISTS idx_dumpy_screenshots_room_created 
 ON public.dumpy_screenshots (room_id, created_at DESC);

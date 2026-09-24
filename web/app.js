@@ -200,7 +200,6 @@
       const insertUrl = `${config.url}/rest/v1/dumpy_screenshots`;
       const recordPayload = {
         room_id: state.roomId,
-        device_id: state.deviceId,
         file_name: file.name,
         file_url: publicUrl,
         storage_path: storagePath,
@@ -208,8 +207,11 @@
         mime_type: mimeType,
         is_inserted: false
       };
+      if (state.deviceId) {
+        recordPayload.device_id = state.deviceId;
+      }
 
-      const dbResponse = await fetch(insertUrl, {
+      let dbResponse = await fetch(insertUrl, {
         method: 'POST',
         headers: {
           'apikey': config.key,
@@ -219,6 +221,24 @@
         },
         body: JSON.stringify(recordPayload)
       });
+
+      // Smart fallback: if table schema cache is missing device_id or other optional columns, retry without it
+      if (!dbResponse.ok && recordPayload.device_id) {
+        const errorCopy = await dbResponse.clone().text();
+        if (errorCopy.includes('device_id') || errorCopy.includes('PGRST204')) {
+          delete recordPayload.device_id;
+          dbResponse = await fetch(insertUrl, {
+            method: 'POST',
+            headers: {
+              'apikey': config.key,
+              'Authorization': `Bearer ${config.key}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify(recordPayload)
+          });
+        }
+      }
 
       if (!dbResponse.ok) {
         const dbErrText = await dbResponse.text();
