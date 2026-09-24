@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="50%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="beamGrad" x1="0%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="50%" stop-color="#93C5FD" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="1"/>
+    </linearGradient>
+    <linearGradient id="phoneGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#DBEAFE" stop-opacity="0.75"/>
+    </linearGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#1E40AF" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- App Squircle -->
+  <rect width="512" height="512" rx="116" fill="url(#bgGrad)"/>
+
+  <!-- Angled Mobile Device Base -->
+  <path d="M 68 310 C 62 292 78 276 96 268 L 220 216 C 238 208 258 218 266 236 L 434 446 C 442 458 438 474 424 482 C 414 488 398 488 386 480 L 102 344 C 82 334 72 324 68 310 Z" fill="url(#phoneGrad)" opacity="0.85" filter="url(#softGlow)"/>
+
+  <!-- Upward Beaming Swoosh & Arrow -->
+  <path d="M 120 326 C 200 300 240 240 250 170 L 210 170 C 200 170 196 156 206 146 L 250 94 C 254 90 260 90 264 94 L 308 146 C 318 156 314 170 304 170 L 264 170 C 274 240 314 360 410 450 C 310 390 230 360 120 326 Z" fill="url(#beamGrad)" filter="url(#softGlow)"/>
+</svg>
