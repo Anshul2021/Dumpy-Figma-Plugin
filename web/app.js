@@ -282,16 +282,23 @@
     }
   }
 
-  // Handle incoming file list
+  // Handle incoming file list (Single & Multi-Select)
   async function handleFiles(fileList) {
     if (!fileList || fileList.length === 0) return;
 
     el.queueSection.style.display = 'block';
+    const validFiles = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+    if (validFiles.length === 0) return;
 
-    for (let i = 0; i < fileList.length; i++) {
-      const file = fileList[i];
-      if (!file.type.startsWith('image/')) continue;
+    state.uploadQueue.push(...validFiles);
+    if (el.queueCountBadge) {
+      el.queueCountBadge.textContent = `${state.uploadQueue.length} file${state.uploadQueue.length > 1 ? 's' : ''}`;
+    }
 
+    const uploadPromises = [];
+
+    for (let i = 0; i < validFiles.length; i++) {
+      const file = validFiles[i];
       const fileId = 'f_' + Math.random().toString(36).substring(2, 9);
       const dimensions = await getImageDimensions(file);
 
@@ -333,8 +340,10 @@
       `;
 
       el.queueList.prepend(card);
-      uploadScreenshot(fileItem);
+      uploadPromises.push(uploadScreenshot(fileItem));
     }
+
+    await Promise.allSettled(uploadPromises);
   }
 
   // Event Listeners - Pure Room-based, no auth

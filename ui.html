@@ -4,20 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dumpy — Real-Time Screenshot Inbox</title>
+  
+  <!-- DM Sans Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      /* Clean Light Mode Blue Theme */
-      --bg-page: #F8FAFC;
+      /* Clean Figma Native / Sapphire Surface Palette */
+      --bg-page: #FFFFFF;
       --bg-surface: #FFFFFF;
-      --bg-surface-hover: #F1F5F9;
-      --bg-subtle: #F8FAFC;
+      --bg-surface-hover: #F8FAFC;
+      --bg-subtle: #F1F5F9;
       --bg-accent-subtle: #EFF6FF;
       
       --primary: #2563EB;
       --primary-hover: #1D4ED8;
+      --primary-gradient: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
       --primary-light: #EFF6FF;
       --primary-border: #BFDBFE;
       --primary-glow: rgba(37, 99, 235, 0.2);
@@ -26,24 +30,26 @@
       --success-bg: #ECFDF5;
       --success-border: #A7F3D0;
       
-      --warning: #D97706;
       --danger: #DC2626;
+      --danger-bg: #FEF2F2;
+      --danger-border: #FECACA;
       
       --text-main: #0F172A;
       --text-secondary: #475569;
       --text-muted: #94A3B8;
       
-      --border-color: #E2E8F0;
+      --border: #E2E8F0;
       --border-light: #F1F5F9;
+      --border-focus: #3B82F6;
       
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 14px;
-      --radius-xl: 18px;
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
       
       --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-      --shadow-md: 0 4px 12px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
+      --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+      --shadow-md: 0 8px 20px -3px rgba(15, 23, 42, 0.08);
       --shadow-primary: 0 4px 14px rgba(37, 99, 235, 0.25);
     }
 
@@ -83,14 +89,14 @@
       background: #94A3B8;
     }
 
-    /* Header */
+    /* Top App Header */
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 10px 14px;
       background: var(--bg-surface);
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
 
@@ -101,20 +107,24 @@
     }
 
     .logo-badge {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #2563EB, #3B82F6);
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: var(--primary-gradient);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #FFFFFF;
-      box-shadow: 0 2px 8px var(--primary-glow);
+      box-shadow: 0 2px 6px var(--primary-glow);
+    }
+    .logo-badge .icon {
+      width: 15px;
+      height: 15px;
     }
 
     .brand-text {
       font-weight: 700;
-      font-size: 15px;
+      font-size: 14px;
       letter-spacing: -0.3px;
       color: var(--text-main);
     }
@@ -125,13 +135,11 @@
       gap: 6px;
     }
 
-    /* Auth elements removed - Pure Room-based system */
-
     .status-pill {
       display: flex;
       align-items: center;
       gap: 5px;
-      padding: 3px 7px;
+      padding: 3px 8px;
       border-radius: 20px;
       background: var(--success-bg);
       border: 1px solid var(--success-border);
@@ -155,107 +163,62 @@
       100% { opacity: 1; transform: scale(1); }
     }
 
-    .icon-btn {
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-secondary);
-      width: 28px;
-      height: 28px;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .icon-btn:hover {
-      background: var(--bg-surface-hover);
-      color: var(--text-main);
-      border-color: var(--border-color);
-    }
-
-    /* Main Scroll Area */
+    /* Main Scrollable Surface */
     .main-content {
       flex: 1;
       overflow-y: auto;
       padding: 14px 16px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
     }
 
-    /* Minimal Pairing Card */
-    .card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 14px 16px;
-      position: relative;
-      box-shadow: var(--shadow-xs);
-    }
-
-    .pairing-header {
+    /* 1. Centered Pairing Section (On Surface) */
+    .pairing-surface {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
+      text-align: center;
+      gap: 10px;
+      padding: 6px 0 12px 0;
+      border-bottom: 1px solid var(--border);
     }
 
-    .card-title {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .pairing-container {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .qr-box {
-      width: 92px;
-      height: 92px;
+    .qr-frame {
+      width: 136px;
+      height: 136px;
       background: #FFFFFF;
-      padding: 4px;
+      padding: 5px;
       border-radius: var(--radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border);
       box-shadow: var(--shadow-sm);
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      overflow: hidden;
       position: relative;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
     }
-    .qr-box:hover {
+    .qr-frame:hover {
       transform: scale(1.02);
       box-shadow: var(--shadow-md);
+      border-color: var(--primary-border);
     }
-
-    .qr-box canvas, .qr-box svg, .qr-box img {
+    .qr-frame svg, .qr-frame img {
       width: 100% !important;
       height: 100% !important;
       display: block;
       object-fit: contain;
     }
 
-    .pairing-info {
-      flex: 1;
+    .room-code-group {
       display: flex;
-      flex-direction: column;
-      gap: 5px;
-      min-width: 0;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
-    .room-code-tag {
+    .room-code-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -264,58 +227,69 @@
       font-weight: 700;
       color: var(--primary);
       background: var(--primary-light);
-      padding: 3px 8px;
-      border-radius: var(--radius-sm);
+      padding: 4px 10px;
+      border-radius: var(--radius-xs);
       border: 1px solid var(--primary-border);
-      width: fit-content;
-      letter-spacing: 0.5px;
-    }
-
-    .pairing-desc {
-      font-size: 11px;
-      color: var(--text-secondary);
-      line-height: 1.35;
-    }
-
-    .pairing-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 2px;
-    }
-
-    .btn-secondary-sm {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      color: var(--text-secondary);
-      padding: 4px 8px;
-      border-radius: var(--radius-sm);
-      font-size: 11px;
-      font-weight: 600;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+      letter-spacing: 0.5px;
       transition: all 0.15s ease;
     }
-    .btn-secondary-sm:hover {
+    .room-code-badge:hover {
+      background: #DBEAFE;
+    }
+    .room-code-badge:active {
+      transform: scale(0.96);
+    }
+
+    .copy-icon {
+      width: 12px;
+      height: 12px;
+      stroke: var(--primary);
+      opacity: 0.75;
+    }
+
+    .icon-btn-subtle {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      width: 26px;
+      height: 26px;
+      border-radius: var(--radius-xs);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: var(--shadow-xs);
+    }
+    .icon-btn-subtle:hover {
       background: var(--bg-surface-hover);
       color: var(--text-main);
       border-color: #CBD5E1;
     }
-
-    /* Section Target Selector */
-    .section-selector {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 14px 16px;
-      box-shadow: var(--shadow-xs);
+    .icon-btn-subtle:active {
+      transform: scale(0.94);
     }
 
-    .section-header-row {
+    .pairing-caption {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    /* 2. Destination Section Row (Surface Level) */
+    .section-surface-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .surface-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -330,10 +304,10 @@
     .custom-select {
       width: 100%;
       background: var(--bg-subtle);
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border);
       color: var(--text-main);
-      padding: 8px 30px 8px 11px;
-      border-radius: var(--radius-sm);
+      padding: 7px 28px 7px 10px;
+      border-radius: var(--radius-xs);
       font-size: 12px;
       font-weight: 500;
       outline: none;
@@ -353,12 +327,13 @@
       transform: translateY(-50%);
       pointer-events: none;
       color: var(--text-muted);
+      width: 14px;
+      height: 14px;
     }
 
     .new-section-row {
       display: none;
       gap: 6px;
-      margin-top: 4px;
     }
     .new-section-row.active {
       display: flex;
@@ -367,10 +342,10 @@
     .text-input {
       flex: 1;
       background: var(--bg-subtle);
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border);
       color: var(--text-main);
-      padding: 7px 11px;
-      border-radius: var(--radius-sm);
+      padding: 7px 10px;
+      border-radius: var(--radius-xs);
       font-size: 12px;
       outline: none;
       transition: border-color 0.15s, background 0.15s;
@@ -380,12 +355,19 @@
       background: #FFFFFF;
     }
 
-    /* Inbox Header & Action Bar */
-    .inbox-bar {
+    /* 3. Live Inbox Section (Surface Level) */
+    .inbox-surface-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .inbox-header-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 4px 0;
+      padding: 2px 0;
     }
 
     .inbox-title-group {
@@ -431,7 +413,7 @@
       appearance: none;
       width: 14px;
       height: 14px;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border);
       background: var(--bg-surface);
       border-radius: 3px;
       cursor: pointer;
@@ -451,11 +433,29 @@
       width: 4px;
       height: 8px;
       border: solid white;
-      border-width: 0 2px 2px 0;
+      border-width: 0 1.5px 1.5px 0;
       transform: rotate(45deg);
     }
 
-    /* Inbox Item List */
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-xs);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .icon-btn:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-main);
+    }
+
+    /* Inbox List & Items */
     .inbox-list {
       display: flex;
       flex-direction: column;
@@ -463,16 +463,12 @@
     }
 
     .empty-state {
+      padding: 24px 16px;
+      text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 28px 16px;
-      background: var(--bg-surface);
-      border: 1px dashed var(--border-color);
-      border-radius: var(--radius-lg);
-      gap: 8px;
+      gap: 6px;
     }
 
     .empty-icon-wrap {
@@ -484,81 +480,62 @@
       align-items: center;
       justify-content: center;
       color: var(--text-muted);
+      margin-bottom: 2px;
     }
 
     .empty-text {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
-      color: var(--text-main);
+      color: var(--text-secondary);
     }
 
     .empty-sub {
       font-size: 11px;
-      color: var(--text-secondary);
-      max-width: 220px;
+      color: var(--text-muted);
+      max-width: 240px;
       line-height: 1.35;
     }
 
-    /* Screenshot Card */
-    .screenshot-card {
+    /* Screenshot Item Row */
+    .item-row {
       display: flex;
       align-items: center;
-      gap: 11px;
+      gap: 10px;
+      padding: 8px 10px;
       background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 8px 11px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
       transition: all 0.15s ease;
       position: relative;
-      box-shadow: var(--shadow-xs);
     }
-    .screenshot-card:hover {
+    .item-row:hover {
       border-color: #CBD5E1;
-      box-shadow: var(--shadow-sm);
+      background: var(--bg-surface-hover);
     }
-    .screenshot-card.inserted {
-      background: var(--success-bg);
-      border-color: var(--success-border);
-      opacity: 0.85;
-    }
-    .screenshot-card.inserted::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 3px;
-      background: var(--success);
-      border-radius: var(--radius-md) 0 0 var(--radius-md);
+    .item-row.selected {
+      border-color: var(--primary-border);
+      background: #F8FAFF;
     }
 
-    .thumb-wrapper {
-      width: 44px;
-      height: 60px;
-      border-radius: 6px;
-      background: var(--bg-subtle);
-      overflow: hidden;
-      flex-shrink: 0;
-      position: relative;
-      border: 1px solid var(--border-color);
-    }
-
-    .thumb-img {
-      width: 100%;
-      height: 100%;
+    .item-thumb-box {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-xs);
       object-fit: cover;
-      display: block;
+      flex-shrink: 0;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
     }
 
-    .item-meta {
+    .item-details {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 2px;
       min-width: 0;
     }
 
-    .item-title {
+    .item-name {
       font-size: 12px;
       font-weight: 600;
       color: var(--text-main);
@@ -567,75 +544,82 @@
       text-overflow: ellipsis;
     }
 
-    .item-subtext {
+    .item-meta {
+      font-size: 10px;
+      color: var(--text-muted);
       display: flex;
       align-items: center;
-      gap: 5px;
-      font-size: 10px;
-      color: var(--text-secondary);
+      gap: 4px;
     }
 
     .item-actions {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       flex-shrink: 0;
     }
 
     .btn-item-insert {
-      background: var(--primary);
-      border: none;
-      color: #FFFFFF;
-      padding: 5px 9px;
-      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
       font-size: 11px;
       font-weight: 600;
+      padding: 4px 8px;
+      border-radius: var(--radius-xs);
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
       transition: all 0.15s ease;
     }
     .btn-item-insert:hover {
-      background: var(--primary-hover);
-    }
-    .btn-item-insert:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #FFFFFF;
     }
 
-    /* Footer / Bottom Actions */
+    .badge-inserted {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--success);
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      padding: 2px 6px;
+      border-radius: var(--radius-xs);
+    }
+
+    /* Bottom Action Bar */
     .footer {
+      padding: 10px 14px 12px 14px;
       background: var(--bg-surface);
-      border-top: 1px solid var(--border-color);
-      padding: 12px 14px;
+      border-top: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       flex-shrink: 0;
     }
 
     .btn-primary {
       width: 100%;
-      background: linear-gradient(135deg, #2563EB, #1D4ED8);
+      background: var(--primary-gradient);
       border: none;
       color: #FFFFFF;
-      padding: 10px 16px;
-      border-radius: var(--radius-md);
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 600;
+      padding: 9px 14px;
+      border-radius: var(--radius-xs);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       box-shadow: var(--shadow-primary);
       transition: all 0.15s ease;
     }
     .btn-primary:hover:not(:disabled) {
-      filter: brightness(1.06);
-      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+    }
+    .btn-primary:active:not(:disabled) {
+      transform: scale(0.98);
     }
     .btn-primary:disabled {
       background: #E2E8F0;
@@ -648,112 +632,30 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-muted);
+      padding: 0 2px;
     }
 
     .link-sub {
-      color: var(--primary);
-      text-decoration: none;
       cursor: pointer;
+      color: var(--text-secondary);
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      font-weight: 600;
+      gap: 3px;
+      transition: color 0.15s;
     }
     .link-sub:hover {
-      color: var(--primary-hover);
-    }
-
-    /* Room Switcher Modal */
-    .modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(15, 23, 42, 0.45);
-      backdrop-filter: blur(4px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 16px;
-    }
-    .modal-backdrop.open {
-      display: flex;
-    }
-
-    .modal-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      width: 100%;
-      max-width: 340px;
-      box-shadow: var(--shadow-md);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      animation: modalSlide 0.2s ease;
-    }
-
-    @keyframes modalSlide {
-      from { transform: scale(0.96); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .modal-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .modal-body {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .input-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    .modal-footer {
-      padding: 12px 16px;
-      background: var(--bg-page);
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
+      color: var(--primary);
     }
 
     /* Toast Notification */
     .toast {
       position: fixed;
-      bottom: 72px;
+      bottom: 64px;
       left: 50%;
       transform: translateX(-50%) translateY(10px);
-      background: var(--text-main);
+      background: rgba(15, 23, 42, 0.94);
       color: #FFFFFF;
       padding: 6px 14px;
       border-radius: 20px;
@@ -765,15 +667,16 @@
       gap: 6px;
       opacity: 0;
       pointer-events: none;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 200;
+      white-space: nowrap;
     }
     .toast.show {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
 
-    /* Icons Helper */
+    /* SVG Icon Helper */
     .icon {
       width: 14px;
       height: 14px;
@@ -793,7 +696,7 @@
   <header class="header">
     <div class="brand">
       <div class="logo-badge">
-        <svg class="icon" style="width: 16px; height: 16px;" viewBox="0 0 24 24">
+        <svg class="icon" viewBox="0 0 24 24">
           <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
         </svg>
       </div>
@@ -801,81 +704,49 @@
     </div>
     
     <div class="header-actions">
-      <!-- Pure Room-based system - No auth needed -->
-
       <div class="status-pill" id="statusPill" title="Live Supabase sync active">
         <span class="status-dot"></span>
         <span id="statusText">Live (1.5s)</span>
       </div>
-
-      <button class="icon-btn" id="btnSettings" title="Supabase Settings">
-        <svg class="icon" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
-        </svg>
-      </button>
     </div>
   </header>
 
-  <!-- Main Scrollable Area -->
+  <!-- Main Scrollable Surface -->
   <main class="main-content">
 
-    <!-- Mobile Pairing Card -->
-    <div class="card">
-      <div class="pairing-header">
-        <span class="card-title">
-          <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);">
-            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-            <line x1="12" y1="18" x2="12.01" y2="18"/>
+    <!-- 1. Centered Device Pairing Surface -->
+    <div class="pairing-surface">
+      <div class="qr-frame" id="qrContainer" title="Scan with phone camera to beam screenshots"></div>
+      
+      <div class="room-code-group">
+        <div class="room-code-badge" id="roomCodeDisplay" title="Tap to copy Room Code">
+          <span id="roomCodeText">DMP-........</span>
+          <svg class="icon copy-icon" viewBox="0 0 24 24">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
           </svg>
-          Device Pairing
-        </span>
-        <button class="icon-btn" id="btnNewRoom" title="Generate New Room Code">
+        </div>
+        <button class="icon-btn-subtle" id="btnNewRoom" title="Generate New Room Code">
           <svg class="icon" viewBox="0 0 24 24">
             <path d="M23 4v6h-6M1 20v-6h6"/>
             <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
           </svg>
         </button>
       </div>
-      <div class="pairing-container">
-        <div class="qr-box" id="qrContainer" title="Scan with phone camera">
-          <canvas id="qrCanvas" width="180" height="180"></canvas>
-        </div>
-        <div class="pairing-info">
-          <div class="room-code-tag" id="roomCodeDisplay">DMP-....</div>
-          <p class="pairing-desc">Scan to beam mobile screenshots straight into Figma.</p>
-          <div class="pairing-actions">
-            <button class="btn-secondary-sm" id="btnCopyLink">
-              <svg class="icon" viewBox="0 0 24 24">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-              </svg>
-              Copy Link
-            </button>
-            <button class="btn-secondary-sm" id="btnSwitchRoom">
-              Enter Code
-            </button>
-          </div>
-        </div>
-      </div>
+
+      <p class="pairing-caption">Scan with your phone to beam screenshots directly to this canvas.</p>
     </div>
 
-    <!-- Section Target Selector -->
-    <div class="section-selector">
-      <div class="section-header-row">
-        <span class="card-title">
-          <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);">
-            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-            <polyline points="2 17 12 22 22 17"/>
-            <polyline points="2 12 12 17 22 12"/>
-          </svg>
-          Figma Section Target
-        </span>
-        <button class="icon-btn" id="btnRefreshSections" title="Refresh Page Sections">
+    <!-- 2. Destination Figma Section Selector (Surface Level) -->
+    <div class="section-surface-row">
+      <div class="surface-label">
+        <span>Target Section</span>
+        <span class="link-sub" id="btnRefreshSections" title="Refresh Page Sections">
           <svg class="icon" viewBox="0 0 24 24">
             <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l5.67-5.67"/>
           </svg>
-        </button>
+          Refresh
+        </span>
       </div>
 
       <div class="select-wrapper">
@@ -893,44 +764,46 @@
       </div>
     </div>
 
-    <!-- Inbox Header & Actions -->
-    <div class="inbox-bar">
-      <div class="inbox-title-group">
-        <span class="inbox-heading">Inbox</span>
-        <span class="count-pill" id="itemCountPill">0</span>
-      </div>
-      <div class="inbox-controls">
-        <label class="checkbox-label" id="selectAllLabel">
-          <input type="checkbox" class="checkbox-custom" id="selectAllCheckbox" checked>
-          <span>Select All</span>
-        </label>
-        <button class="icon-btn" id="btnClearInbox" title="Clear Inserted Screenshots">
-          <svg class="icon" viewBox="0 0 24 24">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Screenshots List -->
-    <div class="inbox-list" id="inboxList">
-      <div class="empty-state" id="emptyState">
-        <div class="empty-icon-wrap">
-          <svg class="icon" style="width: 18px; height: 18px;" viewBox="0 0 24 24">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
+    <!-- 3. Live Inbox Section (Surface Level) -->
+    <div class="inbox-surface-section">
+      <div class="inbox-header-row">
+        <div class="inbox-title-group">
+          <span class="inbox-heading">Inbox</span>
+          <span class="count-pill" id="itemCountPill">0</span>
         </div>
-        <div class="empty-text">Inbox is empty</div>
-        <p class="empty-sub">Snap or select screenshots on your paired phone to see them appear here.</p>
+        <div class="inbox-controls">
+          <label class="checkbox-label" id="selectAllLabel">
+            <input type="checkbox" class="checkbox-custom" id="selectAllCheckbox" checked>
+            <span>Select All</span>
+          </label>
+          <button class="icon-btn" id="btnClearInbox" title="Clear Inserted Screenshots">
+            <svg class="icon" viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Screenshots List -->
+      <div class="inbox-list" id="inboxList">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon-wrap">
+            <svg class="icon" style="width: 18px; height: 18px;" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <div class="empty-text">Inbox is empty</div>
+          <p class="empty-sub">Snap or select screenshots on your phone to see them appear live.</p>
+        </div>
       </div>
     </div>
 
   </main>
 
-  <!-- Footer Actions -->
+  <!-- Bottom Insert Actions -->
   <footer class="footer">
     <button class="btn-primary" id="btnInsertBatch" disabled>
       <svg class="icon" viewBox="0 0 24 24">
@@ -939,85 +812,16 @@
       <span id="btnInsertText">Insert Selected (0)</span>
     </button>
     <div class="footer-subrow">
-      <span>Auto-sync enabled</span>
+      <span>Auto-polling (1.5s)</span>
       <span class="link-sub" id="btnManualRefresh">
         <svg class="icon" viewBox="0 0 24 24">
           <path d="M23 4v6h-6M1 20v-6h6"/>
           <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
         </svg>
-        Sync
+        Sync Now
       </span>
     </div>
   </footer>
-
-  <!-- Room & Account Switching Modal -->
-  <div class="modal-backdrop" id="roomModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">
-          <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);">
-            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-            <line x1="12" y1="18" x2="12.01" y2="18"/>
-          </svg>
-          Device Pairing & Account
-        </div>
-        <button class="icon-btn" id="btnCloseRoomModal">
-          <svg class="icon" viewBox="0 0 24 24">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="input-group">
-          <label class="input-label" for="inputPluginRoom">Pairing Room Code (e.g. DMP-7K9X2M4P)</label>
-          <input type="text" class="text-input" id="inputPluginRoom" placeholder="DMP-7K9X2M4P" />
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-item-insert" id="btnSavePluginRoom">Connect & Sync</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings Modal -->
-  <div class="modal-backdrop" id="settingsModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">
-          <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
-          </svg>
-          Supabase Settings
-        </div>
-        <button class="icon-btn" id="btnCloseSettings">
-          <svg class="icon" viewBox="0 0 24 24">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="input-group">
-          <label class="input-label" for="settingSupabaseUrl">Supabase Project URL</label>
-          <input type="text" class="text-input" id="settingSupabaseUrl" placeholder="https://nivrnksfmkskmjdjzvzb.supabase.co" />
-        </div>
-        <div class="input-group">
-          <label class="input-label" for="settingSupabaseKey">Supabase Anon Key</label>
-          <input type="password" class="text-input" id="settingSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." />
-        </div>
-        <div class="input-group">
-          <label class="input-label" for="settingWebUrl">Vercel Web App URL</label>
-          <input type="text" class="text-input" id="settingWebUrl" placeholder="https://dumpy-figma-plugin.vercel.app" value="https://dumpy-figma-plugin.vercel.app" />
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-secondary-sm" id="btnResetSettings">Reset</button>
-        <button class="btn-item-insert" id="btnSaveSettings">Save & Connect</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Toast Notification -->
   <div class="toast" id="toastMessage">
@@ -1025,39 +829,37 @@
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
       <polyline points="22 4 12 14.01 9 11.01"/>
     </svg>
-    <span id="toastText">Link copied to clipboard</span>
+    <span id="toastText">Room Code copied!</span>
   </div>
 
-  <!-- Official Compliant QRCode Generator (Kazuhiko Arase, Offline Vector SVG, 4-Module Quiet Zone) -->
+  <!-- Official Compliant QRCode Generator (Kazuhiko Arase, Offline Vector SVG) -->
   <script>
-    var qrcode=(function(){var P=function(x,w){var g=236,l=17,n=x,s=O[w],t=null,r=0,h=null,i=[],v={},_=function(a,f){r=n*4+17,t=(function(e){for(var u=new Array(e),o=0;o<e;o+=1){u[o]=new Array(e);for(var d=0;d<e;d+=1)u[o][d]=null}return u})(r),B(0,0),B(r-7,0),B(0,r-7),E(),T(),m(a,f),n>=7&&N(a),h==null&&(h=nr(n,s,i)),U(h,f)},B=function(a,f){for(var e=-1;e<=7;e+=1)if(!(a+e<=-1||r<=a+e))for(var u=-1;u<=7;u+=1)f+u<=-1||r<=f+u||(0<=e&&e<=6&&(u==0||u==6)||0<=u&&u<=6&&(e==0||e==6)||2<=e&&e<=4&&2<=u&&u<=4?t[a+e][f+u]=!0:t[a+e][f+u]=!1)},y=function(){for(var a=0,f=0,e=0;e<8;e+=1){_(!0,e);var u=k.getLostPoint(v);(e==0||a>u)&&(a=u,f=e)}return f},T=function(){for(var a=8;a<r-8;a+=1)t[a][6]==null&&(t[a][6]=a%2==0);for(var f=8;f<r-8;f+=1)t[6][f]==null&&(t[6][f]=f%2==0)},E=function(){for(var a=k.getPatternPosition(n),f=0;f<a.length;f+=1)for(var e=0;e<a.length;e+=1){var u=a[f],o=a[e];if(t[u][o]==null)for(var d=-2;d<=2;d+=1)for(var c=-2;c<=2;c+=1)d==-2||d==2||c==-2||c==2||d==0&&c==0?t[u+d][o+c]=!0:t[u+d][o+c]=!1}},N=function(a){for(var f=k.getBCHTypeNumber(n),e=0;e<18;e+=1){var u=!a&&(f>>e&1)==1;t[Math.floor(e/3)][e%3+r-8-3]=u}for(var e=0;e<18;e+=1){var u=!a&&(f>>e&1)==1;t[e%3+r-8-3][Math.floor(e/3)]=u}},m=function(a,f){for(var e=s<<3|f,u=k.getBCHTypeInfo(e),o=0;o<15;o+=1){var d=!a&&(u>>o&1)==1;o<6?t[o][8]=d:o<8?t[o+1][8]=d:t[r-15+o][8]=d}for(var o=0;o<15;o+=1){var d=!a&&(u>>o&1)==1;o<8?t[8][r-o-1]=d:o<9?t[8][15-o-1+1]=d:t[8][15-o-1]=d}t[r-8][8]=!a},U=function(a,f){for(var e=-1,u=r-1,o=7,d=0,c=k.getMaskFunction(f),p=r-1;p>0;p-=2)for(p==6&&(p-=1);;){for(var b=0;b<2;b+=1)if(t[u][p-b]==null){var C=!1;d<a.length&&(C=(a[d]>>>o&1)==1);var A=c(u,p-b);A&&(C=!C),t[u][p-b]=C,o-=1,o==-1&&(d+=1,o=7)}if(u+=e,u<0||r<=u){u-=e,e=-e;break}}},H=function(a,f){for(var e=0,u=0,o=0,d=new Array(f.length),c=new Array(f.length),p=0;p<f.length;p+=1){var b=f[p].dataCount,C=f[p].totalCount-b;u=Math.max(u,b),o=Math.max(o,C),d[p]=new Array(b);for(var A=0;A<d[p].length;A+=1)d[p][A]=255&a.getBuffer()[A+e];e+=b;var R=k.getErrorCorrectPolynomial(C),I=K(d[p],R.getLength()-1),S=I.mod(R);c[p]=new Array(R.getLength()-1);for(var A=0;A<c[p].length;A+=1){var X=A+S.getLength()-c[p].length;c[p][A]=X>=0?S.getAt(X):0}}for(var Z=0,A=0;A<f.length;A+=1)Z+=f[A].totalCount;for(var J=new Array(Z),Q=0,A=0;A<u;A+=1)for(var p=0;p<f.length;p+=1)A<d[p].length&&(J[Q]=d[p][A],Q+=1);for(var A=0;A<o;A+=1)for(var p=0;p<f.length;p+=1)A<c[p].length&&(J[Q]=c[p][A],Q+=1);return J},nr=function(a,f,e){for(var u=Y.getRSBlocks(a,f),o=G(),d=0;d<e.length;d+=1){var c=e[d];o.put(c.getMode(),4),o.put(c.getLength(),k.getLengthInBits(c.getMode(),a)),c.write(o)}for(var p=0,d=0;d<u.length;d+=1)p+=u[d].dataCount;if(o.getLengthInBits()>p*8)throw"code length overflow. ("+o.getLengthInBits()+">"+p*8+")";for(o.getLengthInBits()+4<=p*8&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=p*8||(o.put(g,8),o.getLengthInBits()>=p*8));)o.put(l,8);return H(o,u)};v.addData=function(a,f){f=f||"Byte";var e=null;switch(f){case"Numeric":e=$(a);break;case"Alphanumeric":e=W(a);break;case"Byte":e=V(a);break;case"Kanji":e=q(a);break;default:throw"mode:"+f}i.push(e),h=null},v.isDark=function(a,f){if(a<0||r<=a||f<0||r<=f)throw a+","+f;return t[a][f]},v.getModuleCount=function(){return r},v.make=function(){if(n<1){for(var a=1;a<40;a++){for(var f=Y.getRSBlocks(a,s),e=G(),u=0;u<i.length;u++){var o=i[u];e.put(o.getMode(),4),e.put(o.getLength(),k.getLengthInBits(o.getMode(),a)),o.write(e)}for(var d=0,u=0;u<f.length;u++)d+=f[u].dataCount;if(e.getLengthInBits()<=d*8)break}n=a}_(!1,y())},v.createTableTag=function(a,f){a=a||2,f=typeof f>"u"?a*4:f;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+f+"px;",e+='">',e+="<tbody>";for(var u=0;u<v.getModuleCount();u+=1){e+="<tr>";for(var o=0;o<v.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+a+"px;",e+=" height: "+a+"px;",e+=" background-color: ",e+=v.isDark(u,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>",e},v.createSvgTag=function(a,f,e,u){var o={};typeof arguments[0]=="object"&&(o=arguments[0],a=o.cellSize,f=o.margin,e=o.alt,u=o.title),a=a||2,f=typeof f>"u"?a*4:f,e=typeof e=="string"?{text:e}:e||{},e.text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,u=typeof u=="string"?{text:u}:u||{},u.text=u.text||null,u.id=u.text?u.id||"qrcode-title":null;var d=v.getModuleCount()*a+f*2,c,p,b,C,A="",R;for(R="l"+a+",0 0,"+a+" -"+a+",0 0,-"+a+"z ",A+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',A+=o.scalable?"":' width="'+d+'px" height="'+d+'px"',A+=' viewBox="0 0 '+d+" "+d+'" ',A+=' preserveAspectRatio="xMinYMin meet"',A+=u.text||e.text?' role="img" aria-labelledby="'+F([u.id,e.id].join(" ").trim())+'"':"",A+=">",A+=u.text?'<title id="'+F(u.id)+'">'+F(u.text)+"</title>":"",A+=e.text?'<description id="'+F(e.id)+'">'+F(e.text)+"</description>":"",A+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',A+='<path d="',b=0;b<v.getModuleCount();b+=1)for(C=b*a+f,c=0;c<v.getModuleCount();c+=1)v.isDark(b,c)&&(p=c*a+f,A+="M"+p+","+C+R);return A+='" stroke="transparent" fill="black"/>',A+="</svg>",A},v.createDataURL=function(a,f){a=a||2,f=typeof f>"u"?a*4:f;var e=v.getModuleCount()*a+f*2,u=f,o=e-f;return er(e,e,function(d,c){if(u<=d&&d<o&&u<=c&&c<o){var p=Math.floor((d-u)/a),b=Math.floor((c-u)/a);return v.isDark(b,p)?0:1}else return 1})},v.createImgTag=function(a,f,e){a=a||2,f=typeof f>"u"?a*4:f;var u=v.getModuleCount()*a+f*2,o="";return o+="<img",o+=' src="',o+=v.createDataURL(a,f),o+='"',o+=' width="',o+=u,o+='"',o+=' height="',o+=u,o+='"',e&&(o+=' alt="',o+=F(e),o+='"'),o+="/>",o};var F=function(a){for(var f="",e=0;e<a.length;e+=1){var u=a.charAt(e);switch(u){case"<":f+="&lt;";break;case">":f+="&gt;";break;case"&":f+="&amp;";break;case'"':f+="&quot;";break;default:f+=u;break}}return f};return v};P.stringToBytesFuncs={default:function(x){for(var w=[],g=0;g<x.length;g+=1){var l=x.charCodeAt(g);w.push(l&255)}return w}},P.stringToBytes=P.stringToBytesFuncs.default;var D={MODE_NUMBER:1,MODE_ALPHA_NUM:2,MODE_8BIT_BYTE:4,MODE_KANJI:8},O={L:1,M:0,Q:3,H:2},L={PATTERN000:0,PATTERN001:1,PATTERN010:2,PATTERN011:3,PATTERN100:4,PATTERN101:5,PATTERN110:6,PATTERN111:7},k=(function(){var x=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],w=1335,g=7973,l=21522,n={},s=function(t){for(var r=0;t!=0;)r+=1,t>>>=1;return r};return n.getBCHTypeInfo=function(t){for(var r=t<<10;s(r)-s(w)>=0;)r^=w<<s(r)-s(w);return(t<<10|r)^l},n.getBCHTypeNumber=function(t){for(var r=t<<12;s(r)-s(g)>=0;)r^=g<<s(r)-s(g);return t<<12|r},n.getPatternPosition=function(t){return x[t-1]},n.getMaskFunction=function(t){switch(t){case L.PATTERN000:return function(r,h){return(r+h)%2==0};case L.PATTERN001:return function(r,h){return r%2==0};case L.PATTERN010:return function(r,h){return h%3==0};case L.PATTERN011:return function(r,h){return(r+h)%3==0};case L.PATTERN100:return function(r,h){return(Math.floor(r/2)+Math.floor(h/3))%2==0};case L.PATTERN101:return function(r,h){return r*h%2+r*h%3==0};case L.PATTERN110:return function(r,h){return(r*h%2+r*h%3)%2==0};case L.PATTERN111:return function(r,h){return(r*h%3+(r+h)%2)%2==0};default:throw"bad maskPattern:"+t}},n.getErrorCorrectPolynomial=function(t){for(var r=K([1],0),h=0;h<t;h+=1)r=r.multiply(K([1,M.gexp(h)],0));return r},n.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case D.MODE_NUMBER:return 10;case D.MODE_ALPHA_NUM:return 9;case D.MODE_8BIT_BYTE:return 8;case D.MODE_KANJI:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case D.MODE_NUMBER:return 12;case D.MODE_ALPHA_NUM:return 11;case D.MODE_8BIT_BYTE:return 16;case D.MODE_KANJI:return 10;default:throw"mode:"+t}else if(r<41)switch(t){case D.MODE_NUMBER:return 14;case D.MODE_ALPHA_NUM:return 13;case D.MODE_8BIT_BYTE:return 16;case D.MODE_KANJI:return 12;default:throw"mode:"+t}else throw"type:"+r},n.getLostPoint=function(t){for(var r=t.getModuleCount(),h=0,i=0;i<r;i+=1)for(var v=0;v<r;v+=1){for(var _=0,B=t.isDark(i,v),y=-1;y<=1;y+=1)if(!(i+y<0||r<=i+y))for(var T=-1;T<=1;T+=1)v+T<0||r<=v+T||y==0&&T==0||B==t.isDark(i+y,v+T)&&(_+=1);_>5&&(h+=3+_-5)}for(var i=0;i<r-1;i+=1)for(var v=0;v<r-1;v+=1){var E=0;t.isDark(i,v)&&(E+=1),t.isDark(i+1,v)&&(E+=1),t.isDark(i,v+1)&&(E+=1),t.isDark(i+1,v+1)&&(E+=1),(E==0||E==4)&&(h+=3)}for(var i=0;i<r;i+=1)for(var v=0;v<r-6;v+=1)t.isDark(i,v)&&!t.isDark(i,v+1)&&t.isDark(i,v+2)&&t.isDark(i,v+3)&&t.isDark(i,v+4)&&!t.isDark(i,v+5)&&t.isDark(i,v+6)&&(h+=40);for(var v=0;v<r;v+=1)for(var i=0;i<r-6;i+=1)t.isDark(i,v)&&!t.isDark(i+1,v)&&t.isDark(i+2,v)&&t.isDark(i+3,v)&&t.isDark(i+4,v)&&!t.isDark(i+5,v)&&t.isDark(i+6,v)&&(h+=40);for(var N=0,v=0;v<r;v+=1)for(var i=0;i<r;i+=1)t.isDark(i,v)&&(N+=1);var m=Math.abs(100*N/r/r-50)/5;return h+=m*10,h},n})(),M=(function(){for(var x=new Array(256),w=new Array(256),g=0;g<8;g+=1)x[g]=1<<g;for(var g=8;g<256;g+=1)x[g]=x[g-4]^x[g-5]^x[g-6]^x[g-8];for(var g=0;g<255;g+=1)w[x[g]]=g;var l={};return l.glog=function(n){if(n<1)throw"glog("+n+")";return w[n]},l.gexp=function(n){for(;n<0;)n+=255;for(;n>=256;)n-=255;return x[n]},l})();function K(x,w){if(typeof x.length>"u")throw x.length+"/"+w;var g=(function(){for(var n=0;n<x.length&&x[n]==0;)n+=1;for(var s=new Array(x.length-n+w),t=0;t<x.length-n;t+=1)s[t]=x[t+n];return s})(),l={};return l.getAt=function(n){return g[n]},l.getLength=function(){return g.length},l.multiply=function(n){for(var s=new Array(l.getLength()+n.getLength()-1),t=0;t<l.getLength();t+=1)for(var r=0;r<n.getLength();r+=1)s[t+r]^=M.gexp(M.glog(l.getAt(t))+M.glog(n.getAt(r)));return K(s,0)},l.mod=function(n){if(l.getLength()-n.getLength()<0)return l;for(var s=M.glog(l.getAt(0))-M.glog(n.getAt(0)),t=new Array(l.getLength()),r=0;r<l.getLength();r+=1)t[r]=l.getAt(r);for(var r=0;r<n.getLength();r+=1)t[r]^=M.gexp(M.glog(n.getAt(r))+s);return K(t,0).mod(n)},l}var Y=(function(){var x=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],w=function(n,s){var t={};return t.totalCount=n,t.dataCount=s,t},g={},l=function(n,s){switch(s){case O.L:return x[(n-1)*4+0];case O.M:return x[(n-1)*4+1];case O.Q:return x[(n-1)*4+2];case O.H:return x[(n-1)*4+3];default:return}};return g.getRSBlocks=function(n,s){var t=l(n,s);if(typeof t>"u")throw"bad rs block @ typeNumber:"+n+"/errorCorrectionLevel:"+s;for(var r=t.length/3,h=[],i=0;i<r;i+=1)for(var v=t[i*3+0],_=t[i*3+1],B=t[i*3+2],y=0;y<v;y+=1)h.push(w(_,B));return h},g})(),G=function(){var x=[],w=0,g={};return g.getBuffer=function(){return x},g.getAt=function(l){var n=Math.floor(l/8);return(x[n]>>>7-l%8&1)==1},g.put=function(l,n){for(var s=0;s<n;s+=1)g.putBit((l>>>n-s-1&1)==1)},g.getLengthInBits=function(){return w},g.putBit=function(l){var n=Math.floor(w/8);x.length<=n&&x.push(0),l&&(x[n]|=128>>>w%8),w+=1},g},$=function(x){var w=D.MODE_NUMBER,g=x,l={};l.getMode=function(){return w},l.getLength=function(t){return g.length},l.write=function(t){for(var r=g,h=0;h+2<r.length;)t.put(n(r.substring(h,h+3)),10),h+=3;h<r.length&&(r.length-h==1?t.put(n(r.substring(h,h+1)),4):r.length-h==2&&t.put(n(r.substring(h,h+2)),7))};var n=function(t){for(var r=0,h=0;h<t.length;h+=1)r=r*10+s(t.charAt(h));return r},s=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-48;throw"illegal char :"+t};return l},W=function(x){var w=D.MODE_ALPHA_NUM,g=x,l={};l.getMode=function(){return w},l.getLength=function(s){return g.length},l.write=function(s){for(var t=g,r=0;r+1<t.length;)s.put(n(t.charAt(r))*45+n(t.charAt(r+1)),11),r+=2;r<t.length&&s.put(n(t.charAt(r)),6)};var n=function(s){if("0"<=s&&s<="9")return s.charCodeAt(0)-48;if("A"<=s&&s<="Z")return s.charCodeAt(0)-65+10;switch(s){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+s}};return l},V=function(x){var w=D.MODE_8BIT_BYTE,g=x,l=P.stringToBytes(x),n={};return n.getMode=function(){return w},n.getLength=function(s){return l.length},n.write=function(s){for(var t=0;t<l.length;t+=1)s.put(l[t],8)},n},q=function(x){var w=D.MODE_KANJI,g=x,l=P.stringToBytesFuncs.SJIS;if(!l)throw"sjis not supported.";(function(t,r){var h=l(t);if(h.length!=2||(h[0]<<8|h[1])!=r)throw"sjis not supported."})("\u53CB",38726);var n=l(x),s={};return s.getMode=function(){return w},s.getLength=function(t){return~~(n.length/2)},s.write=function(t){for(var r=n,h=0;h+1<r.length;){var i=(255&r[h])<<8|255&r[h+1];if(33088<=i&&i<=40956)i-=33088;else if(57408<=i&&i<=60351)i-=49472;else throw"illegal char at "+(h+1)+"/"+i;i=(i>>>8&255)*192+(i&255),t.put(i,13),h+=2}if(h<r.length)throw"illegal char at "+(h+1)},s};return P})();
+    var qrcode=(function(){var P=function(x,w){var g=236,l=17,n=x,s=O[w],t=null,r=0,h=null,i=[],v={},_=function(a,f){r=n*4+17,t=(function(e){for(var u=new Array(e),o=0;o<e;o+=1){u[o]=new Array(e);for(var d=0;d<e;d+=1)u[o][d]=null}return u})(r),B(0,0),B(r-7,0),B(0,r-7),E(),T(),m(a,f),n>=7&&N(a),h==null&&(h=nr(n,s,i)),U(h,f)},B=function(a,f){for(var e=-1;e<=7;e+=1)if(!(a+e<=-1||r<=a+e))for(var u=-1;u<=7;u+=1)f+u<=-1||r<=f+u||(0<=e&&e<=6&&(u==0||u==6)||0<=u&&u<=6&&(e==0||e==6)||2<=e&&e<=4&&2<=u&&u<=4?t[a+e][f+u]=!0:t[a+e][f+u]=!1)},y=function(){for(var a=0,f=0,e=0;e<8;e+=1){_(!0,e);var u=k.getLostPoint(v);(e==0||a>u)&&(a=u,f=e)}return f},T=function(){for(var a=8;a<r-8;a+=1)t[a][6]==null&&(t[a][6]=a%2==0);for(var f=8;f<r-8;f+=1)t[6][f]==null&&(t[6][f]=f%2==0)},E=function(){for(var a=k.getPatternPosition(n),f=0;f<a.length;f+=1)for(var e=0;e<a.length;e+=1){var u=a[f],o=a[e];if(t[u][o]==null)for(var d=-2;d<=2;d+=1)for(var c=-2;c<=2;c+=1)d==-2||d==2||c==-2||c==2||d==0&&c==0?t[u+d][o+c]=!0:t[u+d][o+c]=!1}},N=function(a){for(var f=k.getBCHTypeNumber(n),e=0;e<18;e+=1){var u=!a&&(f>>e&1)==1;t[Math.floor(e/3)][e%3+r-8-3]=u}for(var e=0;e<18;e+=1){var u=!a&&(f>>e&1)==1;t[e%3+r-8-3][Math.floor(e/3)]=u}},m=function(a,f){for(var e=s<<3|f,u=k.getBCHTypeInfo(e),o=0;o<15;o+=1){var d=!a&&(u>>o&1)==1;o<6?t[o][8]=d:o<8?t[o+1][8]=d:t[r-15+o][8]=d}for(var o=0;o<15;o+=1){var d=!a&&(u>>o&1)==1;o<8?t[8][r-o-1]=d:o<9?t[8][15-o-1+1]=d:t[8][15-o-1]=d}t[r-8][8]=!a},U=function(a,f){for(var e=-1,u=r-1,o=7,d=0,c=k.getMaskFunction(f),p=r-1;p>0;p-=2)for(p==6&&(p-=1);;){for(var b=0;b<2;b+=1)if(t[u][p-b]==null){var C=!1;d<a.length&&(C=(a[d]>>>o&1)==1);var A=c(u,p-b);A&&(C=!C),t[u][p-b]=C,o-=1,o==-1&&(d+=1,o=7)}if(u+=e,u<0||r<=u){u-=e,e=-e;break}}},H=function(a,f){for(var e=0,u=0,o=0,d=new Array(f.length),c=new Array(f.length),p=0;p<f.length;p+=1){var b=f[p].dataCount,C=f[p].totalCount-b;u=Math.max(u,b),o=Math.max(o,C),d[p]=new Array(b);for(var A=0;A<d[p].length;A+=1)d[p][A]=255&a.getBuffer()[A+e];e+=b;var R=k.getErrorCorrectPolynomial(C),I=K(d[p],R.getLength()-1),S=I.mod(R);c[p]=new Array(R.getLength()-1);for(var A=0;A<c[p].length;A+=1){var X=A+S.getLength()-c[p].length;c[p][A]=X>=0?S.getAt(X):0}}for(var Z=0,A=0;A<f.length;A+=1)Z+=f[A].totalCount;for(var J=new Array(Z),Q=0,A=0;A<u;A+=1)for(var p=0;p<f.length;p+=1)A<d[p].length&&(J[Q]=d[p][A],Q+=1);for(var A=0;A<o;A+=1)for(var p=0;p<f.length;p+=1)A<c[p].length&&(J[Q]=c[p][A],Q+=1);return J},nr=function(a,f,e){for(var u=Y.getRSBlocks(a,f),o=G(),d=0;d<e.length;d+=1){var c=e[d];o.put(c.getMode(),4),o.put(c.getLength(),k.getLengthInBits(c.getMode(),a)),c.write(o)}for(var p=0,d=0;d<u.length;d+=1)p+=u[d].dataCount;if(o.getLengthInBits()>p*8)throw"code length overflow. ("+o.getLengthInBits()+">"+p*8+")";for(o.getLengthInBits()+4<=p*8&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=p*8||(o.put(g,8),o.getLengthInBits()>=p*8));)o.put(l,8);return H(o,u)};v.addData=function(a,f){f=f||"Byte";var e=null;switch(f){case"Numeric":e=$(a);break;case"Alphanumeric":e=W(a);break;case"Byte":e=V(a);break;case"Kanji":e=q(a);break;default:throw"mode:"+f}i.push(e),h=null},v.isDark=function(a,f){if(a<0||r<=a||f<0||r<=f)throw a+","+f;return t[a][f]},v.getModuleCount=function(){return r},v.make=function(){if(n<1){for(var a=1;a<40;a++){for(var f=Y.getRSBlocks(a,s),e=G(),u=0;u<i.length;u++){var o=i[u];e.put(o.getMode(),4),e.put(o.getLength(),k.getLengthInBits(o.getMode(),a)),o.write(e)}for(var d=0,u=0;u<f.length;u++)d+=f[u].dataCount;if(e.getLengthInBits()<=d*8)break}n=a}_(!1,y())};v.createSvgTag=function(a,f){a=a||2;f=typeof f>"u"?a*4:f;var d=v.getModuleCount()*a+f*2,b,C,p,A="";for(var R="l"+a+",0 0,"+a+" -"+a+",0 0,-"+a+"z ",A='<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+d+" "+d+'" preserveAspectRatio="xMinYMin meet"><rect width="100%" height="100%" fill="white"/><path d="',b=0;b<v.getModuleCount();b+=1)for(C=b*a+f,c=0;c<v.getModuleCount();c+=1)v.isDark(b,c)&&(p=c*a+f,A+="M"+p+","+C+R);return A+='" stroke="transparent" fill="#0F172A"/></svg>'};return v};P.stringToBytesFuncs={default:function(x){for(var w=[],g=0;g<x.length;g+=1){var l=x.charCodeAt(g);w.push(l&255)}return w}},P.stringToBytes=P.stringToBytesFuncs.default;var D={MODE_NUMBER:1,MODE_ALPHA_NUM:2,MODE_8BIT_BYTE:4,MODE_KANJI:8},O={L:1,M:0,Q:3,H:2},L={PATTERN000:0,PATTERN001:1,PATTERN010:2,PATTERN011:3,PATTERN100:4,PATTERN101:5,PATTERN110:6,PATTERN111:7},k=(function(){var x=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],w=1335,g=7973,l=21522,n={},s=function(t){for(var r=0;t!=0;)r+=1,t>>>=1;return r};return n.getBCHTypeInfo=function(t){for(var r=t<<10;s(r)-s(w)>=0;)r^=w<<s(r)-s(w);return(t<<10|r)^l},n.getBCHTypeNumber=function(t){for(var r=t<<12;s(r)-s(g)>=0;)r^=g<<s(r)-s(g);return t<<12|r},n.getPatternPosition=function(t){return x[t-1]},n.getMaskFunction=function(t){switch(t){case L.PATTERN000:return function(r,h){return(r+h)%2==0};case L.PATTERN001:return function(r,h){return r%2==0};case L.PATTERN010:return function(r,h){return h%3==0};case L.PATTERN011:return function(r,h){return(r+h)%3==0};case L.PATTERN100:return function(r,h){return(Math.floor(r/2)+Math.floor(h/3))%2==0};case L.PATTERN101:return function(r,h){return r*h%2+r*h%3==0};case L.PATTERN110:return function(r,h){return(r*h%2+r*h%3)%2==0};case L.PATTERN111:return function(r,h){return(r*h%3+(r+h)%2)%2==0};default:throw"bad maskPattern:"+t}},n.getErrorCorrectPolynomial=function(t){for(var r=K([1],0),h=0;h<t;h+=1)r=r.multiply(K([1,M.gexp(h)],0));return r},n.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case D.MODE_NUMBER:return 10;case D.MODE_ALPHA_NUM:return 9;case D.MODE_8BIT_BYTE:return 8;case D.MODE_KANJI:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case D.MODE_NUMBER:return 12;case D.MODE_ALPHA_NUM:return 11;case D.MODE_8BIT_BYTE:return 16;case D.MODE_KANJI:return 10;default:throw"mode:"+t}else if(r<41)switch(t){case D.MODE_NUMBER:return 14;case D.MODE_ALPHA_NUM:return 13;case D.MODE_8BIT_BYTE:return 16;case D.MODE_KANJI:return 12;default:throw"mode:"+t}else throw"type:"+r},n.getLostPoint=function(t){for(var r=t.getModuleCount(),h=0,i=0;i<r;i+=1)for(var v=0;v<r;v+=1){for(var _=0,B=t.isDark(i,v),y=-1;y<=1;y+=1)if(!(i+y<0||r<=i+y))for(var T=-1;T<=1;T+=1)v+T<0||r<=v+T||y==0&&T==0||B==t.isDark(i+y,v+T)&&(_+=1);_>5&&(h+=3+_-5)}for(var i=0;i<r-1;i+=1)for(var v=0;v<r-1;v+=1){var E=0;t.isDark(i,v)&&(E+=1),t.isDark(i+1,v)&&(E+=1),t.isDark(i,v+1)&&(E+=1),t.isDark(i+1,v+1)&&(E+=1),(E==0||E==4)&&(h+=3)}for(var i=0;i<r-6;i+=1)for(var v=0;v<r;v+=1)t.isDark(i,v)&&!t.isDark(i+1,v)&&t.isDark(i+2,v)&&t.isDark(i+3,v)&&t.isDark(i+4,v)&&!t.isDark(i+5,v)&&t.isDark(i+6,v)&&(h+=40);for(var v=0;v<r-6;v+=1)for(var i=0;i<r;i+=1)t.isDark(i,v)&&!t.isDark(i,v+1)&&t.isDark(i,v+2)&&t.isDark(i,v+3)&&t.isDark(i,v+4)&&!t.isDark(i,v+5)&&t.isDark(i,v+6)&&(h+=40);for(var N=0,v=0;v<r;v+=1)for(var i=0;i<r;i+=1)t.isDark(i,v)&&(N+=1);var m=Math.abs(100*N/r/r-50)/5;return h+=m*10,h},n})(),M=(function(){for(var x=new Array(256),w=new Array(256),g=0;g<8;g+=1)x[g]=1<<g;for(var g=8;g<256;g+=1)x[g]=x[g-4]^x[g-5]^x[g-6]^x[g-8];for(var g=0;g<255;g+=1)w[x[g]]=g;var l={};return l.glog=function(n){if(n<1)throw"glog("+n+")";return w[n]},l.gexp=function(n){for(;n<0;)n+=255;for(;n>=256;)n-=255;return x[n]},l})();function K(x,w){if(typeof x.length>"u")throw x.length+"/"+w;var g=(function(){for(var n=0;n<x.length&&x[n]==0;)n+=1;for(var s=new Array(x.length-n+w),t=0;t<x.length-n;t+=1)s[t]=x[t+n];return s})(),l={};return l.getAt=function(n){return g[n]},l.getLength=function(){return g.length},l.multiply=function(n){for(var s=new Array(l.getLength()+n.getLength()-1),t=0;t<l.getLength();t+=1)for(var r=0;r<n.getLength();r+=1)s[t+r]^=M.gexp(M.glog(l.getAt(t))+M.glog(n.getAt(r)));return K(s,0)},l.mod=function(n){if(l.getLength()-n.getLength()<0)return l;for(var s=M.glog(l.getAt(0))-M.glog(n.getAt(0)),t=new Array(l.getLength()),r=0;r<l.getLength();r+=1)t[r]=l.getAt(r);for(var r=0;r<n.getLength();r+=1)t[r]^=M.gexp(M.glog(n.getAt(r))+s);return K(t,0).mod(n)},l}var Y=(function(){var x=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],w=function(n,s){var t={};return t.totalCount=n,t.dataCount=s,t},g={},l=function(n,s){switch(s){case O.L:return x[(n-1)*4+0];case O.M:return x[(n-1)*4+1];case O.Q:return x[(n-1)*4+2];case O.H:return x[(n-1)*4+3];default:return}};return g.getRSBlocks=function(n,s){var t=l(n,s);if(typeof t>"u")throw"bad rs block @ typeNumber:"+n+"/errorCorrectionLevel:"+s;for(var r=t.length/3,h=[],i=0;i<r;i+=1)for(var v=t[i*3+0],_=t[i*3+1],B=t[i*3+2],y=0;y<v;y+=1)h.push(w(_,B));return h},g})(),G=function(){var x=[],w=0,g={};return g.getBuffer=function(){return x},g.getAt=function(l){var n=Math.floor(l/8);return(x[n]>>>7-l%8&1)==1},g.put=function(l,n){for(var s=0;s<n;s+=1)g.putBit((l>>>n-s-1&1)==1)},g.getLengthInBits=function(){return w},g.putBit=function(l){var n=Math.floor(w/8);x.length<=n&&x.push(0),l&&(x[n]|=128>>>w%8),w+=1},g},$=function(x){var w=D.MODE_NUMBER,g=x,l={};l.getMode=function(){return w},l.getLength=function(t){return g.length},l.write=function(t){for(var r=g,h=0;h+2<r.length;)t.put(n(r.substring(h,h+3)),10),h+=3;h<r.length&&(r.length-h==1?t.put(n(r.substring(h,h+1)),4):r.length-h==2&&t.put(n(r.substring(h,h+2)),7))};var n=function(t){for(var r=0,h=0;h<t.length;h+=1)r=r*10+s(t.charAt(h));return r},s=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-48;throw"illegal char :"+t};return l},W=function(x){var w=D.MODE_ALPHA_NUM,g=x,l={};l.getMode=function(){return w},l.getLength=function(s){return g.length},l.write=function(s){for(var t=g,r=0;r+1<t.length;)s.put(n(t.charAt(r))*45+n(t.charAt(r+1)),11),r+=2;r<t.length&&s.put(n(t.charAt(r)),6)};var n=function(s){if("0"<=s&&s<="9")return s.charCodeAt(0)-48;if("A"<=s&&s<="Z")return s.charCodeAt(0)-65+10;switch(s){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+s}};return l},V=function(x){var w=D.MODE_8BIT_BYTE,g=x,l=P.stringToBytes(x),n={};return n.getMode=function(){return w},n.getLength=function(s){return l.length},n.write=function(s){for(var t=0;t<l.length;t+=1)s.put(l[t],8)},n},q=function(x){var w=D.MODE_KANJI,g=x,l=P.stringToBytesFuncs.SJIS;if(!l)throw"sjis not supported.";(function(t,r){var h=l(t);if(h.length!=2||(h[0]<<8|h[1])!=r)throw"sjis not supported."})("\u53CB",38726);var n=l(x),s={};return s.getMode=function(){return w},s.getLength=function(t){return~~(n.length/2)},s.write=function(t){for(var r=n,h=0;h+1<r.length;){var i=(255&r[h])<<8|255&r[h+1];if(33088<=i&&i<=40956)i-=33088;else if(57408<=i&&i<=60351)i-=49472;else throw"illegal char at "+(h+1)+"/"+i;i=(i>>>8&255)*192+(i&255),t.put(i,13),h+=2}if(h<r.length)throw"illegal char at "+(h+1)},s};return P})();
     (function(){qrcode.stringToBytesFuncs["UTF-8"]=function(P){function D(O){for(var L=[],k=0;k<O.length;k++){var M=O.charCodeAt(k);M<128?L.push(M):M<2048?L.push(192|M>>6,128|M&63):M<55296||M>=57344?L.push(224|M>>12,128|M>>6&63,128|M&63):(k++,M=65536+((M&1023)<<10|O.charCodeAt(k)&1023),L.push(240|M>>18,128|M>>12&63,128|M>>6&63,128|M&63))}return L}return D(P)}})();
 
-    window.QRCode = {
-      generateSVG: function(text, size, margin) {
-        margin = (typeof margin === "number") ? margin : 4;
-        size = size || 180;
-        var qr = qrcode(0, "M");
-        qr.addData(text);
-        qr.make();
-        var count = qr.getModuleCount();
-        var total = count + margin * 2;
-        var pathData = "";
-        for (var r = 0; r < count; r++) {
-          for (var c = 0; c < count; c++) {
-            if (qr.isDark(r, c)) {
-              pathData += "M" + (c + margin) + "," + (r + margin) + "h1v1h-1z ";
-            }
+    window.generateVectorQRCode = function(text, size, margin) {
+      margin = (typeof margin === "number") ? margin : 4;
+      size = size || 136;
+      var qr = qrcode(0, "M");
+      qr.addData(text);
+      qr.make();
+      var count = qr.getModuleCount();
+      var total = count + margin * 2;
+      var pathData = "";
+      for (var r = 0; r < count; r++) {
+        for (var c = 0; c < count; c++) {
+          if (qr.isDark(r, c)) {
+            pathData += "M" + (c + margin) + "," + (r + margin) + "h1v1h-1z ";
           }
         }
-        return "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 " + total + " " + total + "\" width=\"" + size + "\" height=\"" + size + "\" shape-rendering=\"crispEdges\"><rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/><path fill=\"#0F172A\" d=\"" + pathData + "\"/></svg>";
       }
+      return "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 " + total + " " + total + "\" width=\"" + size + "\" height=\"" + size + "\" shape-rendering=\"crispEdges\"><rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/><path fill=\"#0F172A\" d=\"" + pathData + "\"/></svg>";
     };
   </script>
 
-  <!-- Main Plugin UI Logic -->
+  <!-- Main Controller Logic -->
   <script>
-    // Safe Storage helper (prevents iframe SecurityError / DOMException crashes)
+    // Safe Storage helper
     const safeStorage = {
       getItem: function(key) {
         try { return window.localStorage ? window.localStorage.getItem(key) : null; } catch(e) { return null; }
@@ -1070,18 +872,24 @@
       }
     };
 
-    const cachedRoom = safeStorage.getItem('dumpy_room_id');
-    const initialRoom = cachedRoom || generateSecureRoomId();
+    function generateSecureRoomId() {
+      const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+      let code = '';
+      for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return 'DMP-' + code; // e.g. DMP-7K9X2M4P
+    }
 
+    // Always generate a fresh unique cryptographic room ID on every plugin launch
+    const initialRoom = generateSecureRoomId();
+
+    // Production Credentials
     const state = {
       roomId: initialRoom,
-      supabaseUrl: safeStorage.getItem('dumpy_supabase_url') || 'https://nivrnksfmkskmjdjzvzb.supabase.co',
-      supabaseKey: safeStorage.getItem('dumpy_supabase_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pdnJua3NmbWtza21qZGp6dnpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxODA1NzMsImV4cCI6MjEwNTc1NjU3M30.UycIKgNMXCtoMVkrqfEbia5g2o_c6edwp1iwtIcTIO4',
-      webAppUrl: (function() {
-        const saved = safeStorage.getItem('dumpy_web_url');
-        if (saved && saved !== 'https://dumpy.vercel.app' && !saved.includes('dumpy.vercel.app/')) return saved;
-        return 'https://dumpy-figma-plugin.vercel.app';
-      })(),
+      supabaseUrl: 'https://nivrnksfmkskmjdjzvzb.supabase.co',
+      supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pdnJua3NmbWtza21qZGp6dnpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxODA1NzMsImV4cCI6MjEwNTc1NjU3M30.UycIKgNMXCtoMVkrqfEbia5g2o_c6edwp1iwtIcTIO4',
+      webAppUrl: 'https://dumpy-figma-plugin.vercel.app',
       pollIntervalId: null,
       pollFreqMs: 1500,
       inboxItems: [],
@@ -1094,54 +902,30 @@
 
     const el = {
       qrContainer: document.getElementById('qrContainer'),
-      qrCanvas: document.getElementById('qrCanvas'),
       roomCodeDisplay: document.getElementById('roomCodeDisplay'),
-      btnCopyLink: document.getElementById('btnCopyLink'),
+      roomCodeText: document.getElementById('roomCodeText'),
       btnNewRoom: document.getElementById('btnNewRoom'),
-      btnSwitchRoom: document.getElementById('btnSwitchRoom'),
-      roomModal: document.getElementById('roomModal'),
-      btnCloseRoomModal: document.getElementById('btnCloseRoomModal'),
-      inputPluginRoom: document.getElementById('inputPluginRoom'),
-      btnSavePluginRoom: document.getElementById('btnSavePluginRoom'),
       
       sectionSelect: document.getElementById('sectionSelect'),
-      btnRefreshSections: document.getElementById('btnRefreshSections'),
       newSectionInputRow: document.getElementById('newSectionInputRow'),
       newSectionNameInput: document.getElementById('newSectionNameInput'),
-      inboxList: document.getElementById('inboxList'),
-      emptyState: document.getElementById('emptyState'),
+      btnRefreshSections: document.getElementById('btnRefreshSections'),
+      
+      statusPill: document.getElementById('statusPill'),
+      statusText: document.getElementById('statusText'),
       itemCountPill: document.getElementById('itemCountPill'),
       selectAllCheckbox: document.getElementById('selectAllCheckbox'),
       btnClearInbox: document.getElementById('btnClearInbox'),
+      inboxList: document.getElementById('inboxList'),
+      emptyState: document.getElementById('emptyState'),
+      
       btnInsertBatch: document.getElementById('btnInsertBatch'),
       btnInsertText: document.getElementById('btnInsertText'),
-      btnSettings: document.getElementById('btnSettings'),
-      settingsModal: document.getElementById('settingsModal'),
-      btnCloseSettings: document.getElementById('btnCloseSettings'),
-      settingSupabaseUrl: document.getElementById('settingSupabaseUrl'),
-      settingSupabaseKey: document.getElementById('settingSupabaseKey'),
-      settingWebUrl: document.getElementById('settingWebUrl'),
-      btnSaveSettings: document.getElementById('btnSaveSettings'),
-      btnResetSettings: document.getElementById('btnResetSettings'),
       btnManualRefresh: document.getElementById('btnManualRefresh'),
-      statusPill: document.getElementById('statusPill'),
-      statusText: document.getElementById('statusText'),
+      
       toastMessage: document.getElementById('toastMessage'),
       toastText: document.getElementById('toastText')
     };
-
-    function generateSecureRoomId() {
-      const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-      let code = '';
-      for (let i = 0; i < 8; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return 'DMP-' + code; // e.g., DMP-7K9X2M4P
-    }
-
-    function generateRoomCode() {
-      return generateSecureRoomId();
-    }
 
     function showToast(msg, duration = 2400) {
       el.toastText.textContent = msg;
@@ -1149,228 +933,60 @@
       setTimeout(() => el.toastMessage.classList.remove('show'), duration);
     }
 
-    function formatTimeAgo(dateStr) {
-      const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
-      if (seconds < 5) return 'just now';
-      if (seconds < 60) return `${seconds}s ago`;
-      const minutes = Math.floor(seconds / 60);
-      if (minutes < 60) return `${minutes}m ago`;
-      const hours = Math.floor(minutes / 60);
-      return `${hours}h ago`;
-    }
-
     function formatBytes(bytes) {
-      if (!bytes || bytes === 0) return '0 KB';
+      if (!bytes || bytes === 0) return '0 B';
       const k = 1024;
       const sizes = ['B', 'KB', 'MB', 'GB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     }
 
-    // Pure Room-based system - No auth UI needed
-
-    // Render QR Code as crisp, high-DPI vector SVG (Offline, Instant, High Error Tolerance)
+    // Render QR Code as crisp Vector SVG
     function updatePairingUI() {
+      el.roomCodeText.textContent = state.roomId;
       const pairingUrl = `${state.webAppUrl}/web/index.html?room=${encodeURIComponent(state.roomId)}`;
-      el.roomCodeDisplay.textContent = state.roomId;
-      
+
       try {
-        if (window.QRCode && window.QRCode.generateSVG) {
-          const svgMarkup = window.QRCode.generateSVG(pairingUrl, 180, 4);
-          el.qrContainer.innerHTML = svgMarkup;
-        } else {
-          throw new Error("QRCode generator not ready");
-        }
+        const svgMarkup = window.generateVectorQRCode(pairingUrl, 126, 3);
+        el.qrContainer.innerHTML = svgMarkup;
       } catch (e) {
-        console.warn("Direct SVG QR generation failed, using fallback:", e);
-        el.qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(pairingUrl)}&color=0F172A" alt="QR" />`;
+        console.warn("Vector SVG generation fallback:", e);
+        el.qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=126x126&data=${encodeURIComponent(pairingUrl)}&color=0F172A" alt="QR" />`;
       }
     }
 
     function updateSectionSelect() {
-      const currentVal = el.sectionSelect.value;
-      el.sectionSelect.innerHTML = `
+      const select = el.sectionSelect;
+      const currentVal = select.value;
+      
+      select.innerHTML = `
         <option value="__NEW__">➕ Create New Section...</option>
         <option value="__FREE__">📌 Free Canvas (No Section)</option>
       `;
 
-      state.sections.forEach(sec => {
-        const opt = document.createElement('option');
-        opt.value = sec.id;
-        opt.textContent = `📁 ${sec.name}`;
-        el.sectionSelect.appendChild(opt);
-      });
+      if (state.sections && state.sections.length > 0) {
+        const optGroup = document.createElement('optgroup');
+        optGroup.label = 'Existing Figma Sections';
+        state.sections.forEach(sec => {
+          const opt = document.createElement('option');
+          opt.value = sec.id;
+          opt.textContent = `📁 ${sec.name}`;
+          optGroup.appendChild(opt);
+        });
+        select.appendChild(optGroup);
+      }
 
-      if (state.sections.some(s => s.id === currentVal)) {
-        el.sectionSelect.value = currentVal;
+      const hasPrevVal = Array.from(select.options).some(o => o.value === currentVal);
+      if (hasPrevVal) {
+        select.value = currentVal;
       } else {
-        el.sectionSelect.value = '__NEW__';
-      }
-      
-      toggleNewSectionRow();
-    }
-
-    function toggleNewSectionRow() {
-      if (el.sectionSelect.value === '__NEW__') {
-        el.newSectionInputRow.classList.add('active');
-      } else {
-        el.newSectionInputRow.classList.remove('active');
-      }
-    }
-
-    // Direct Image Loader & Canvas Downscaler (Downscales only if > 4096px)
-    async function fetchAndDownscaleImage(imageUrl) {
-      return new Promise(async (resolve, reject) => {
-        try {
-          const response = await fetch(imageUrl);
-          if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-          const blob = await response.blob();
-          
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          img.onload = async () => {
-            const maxDim = 4096;
-            let width = img.naturalWidth || img.width;
-            let height = img.naturalHeight || img.height;
-
-            // If image is already within Figma limits, pass original bytes directly
-            if (width <= maxDim && height <= maxDim) {
-              const rawBuffer = await blob.arrayBuffer();
-              resolve({
-                bytes: Array.from(new Uint8Array(rawBuffer)),
-                width: width,
-                height: height,
-                wasDownscaled: false
-              });
-              return;
-            }
-
-            // Downscale only if exceeds 4096px
-            if (width > height) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            } else {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-
-            canvas.toBlob(async (scaledBlob) => {
-              if (!scaledBlob) {
-                reject(new Error("Canvas blob conversion failed"));
-                return;
-              }
-              const buffer = await scaledBlob.arrayBuffer();
-              resolve({
-                bytes: Array.from(new Uint8Array(buffer)),
-                width: width,
-                height: height,
-                wasDownscaled: true
-              });
-            }, 'image/jpeg', 0.94);
-          };
-          img.onerror = () => reject(new Error("Image failed to decode"));
-          img.src = URL.createObjectURL(blob);
-        } catch (err) {
-          reject(err);
-        }
-      });
-    }
-
-    function renderInboxList() {
-      el.itemCountPill.textContent = state.inboxItems.length;
-
-      if (state.inboxItems.length === 0) {
-        el.inboxList.innerHTML = '';
-        el.inboxList.appendChild(el.emptyState);
-        el.btnInsertBatch.disabled = true;
-        el.btnInsertText.textContent = `Insert Selected (0)`;
-        return;
+        select.value = '__NEW__';
       }
 
-      if (el.inboxList.contains(el.emptyState)) {
-        el.inboxList.removeChild(el.emptyState);
-      }
-
-      el.inboxList.innerHTML = '';
-
-      state.inboxItems.forEach(item => {
-        const isSelected = state.selectedIds.has(item.id);
-        const card = document.createElement('div');
-        card.className = `screenshot-card ${item.is_inserted ? 'inserted' : ''}`;
-        card.id = `item-${item.id}`;
-
-        const timeAgo = formatTimeAgo(item.created_at);
-        const sizeStr = formatBytes(item.file_size);
-
-        card.innerHTML = `
-          <input type="checkbox" class="checkbox-custom item-checkbox" data-id="${item.id}" ${isSelected ? 'checked' : ''} />
-          <div class="thumb-wrapper">
-            <img src="${item.file_url}" class="thumb-img" alt="${item.file_name}" loading="lazy" />
-          </div>
-          <div class="item-meta">
-            <div class="item-title" title="${item.file_name}">${item.file_name}</div>
-            <div class="item-subtext">
-              <span>${timeAgo}</span>
-              <span>•</span>
-              <span>${sizeStr}</span>
-              ${item.is_inserted ? '<span style="color:var(--success); font-weight:600;">✓ Inserted</span>' : ''}
-            </div>
-          </div>
-          <div class="item-actions">
-            <button class="btn-item-insert btn-single-insert" data-id="${item.id}" title="Insert into Figma">
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-              Insert
-            </button>
-            <button class="icon-btn btn-single-delete" data-id="${item.id}" title="Delete screenshot">
-              <svg class="icon" viewBox="0 0 24 24">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-              </svg>
-            </button>
-          </div>
-        `;
-
-        card.querySelector('.item-checkbox').addEventListener('change', (e) => {
-          if (e.target.checked) {
-            state.selectedIds.add(item.id);
-          } else {
-            state.selectedIds.delete(item.id);
-          }
-          updateBatchButtonState();
-        });
-
-        card.querySelector('.btn-single-insert').addEventListener('click', async () => {
-          await insertSingleItem(item);
-        });
-
-        card.querySelector('.btn-single-delete').addEventListener('click', async () => {
-          await deleteItem(item.id);
-        });
-
-        el.inboxList.appendChild(card);
-      });
-
-      updateBatchButtonState();
+      el.newSectionInputRow.classList.toggle('active', select.value === '__NEW__');
     }
 
-    function updateBatchButtonState() {
-      const selectedCount = state.selectedIds.size;
-      el.btnInsertBatch.disabled = (selectedCount === 0 || state.isInserting);
-      el.btnInsertText.textContent = selectedCount > 0 
-        ? `Insert Selected (${selectedCount})` 
-        : `Insert All (${state.inboxItems.length})`;
-      
-      el.selectAllCheckbox.checked = (state.inboxItems.length > 0 && selectedCount === state.inboxItems.length);
-    }
-
+    // Polling live screenshots from Supabase
     async function pollInbox() {
       if (!state.supabaseUrl || !state.supabaseKey || !state.roomId) return;
 
@@ -1381,7 +997,7 @@
           headers: {
             'apikey': state.supabaseKey,
             'Authorization': `Bearer ${state.supabaseKey}`,
-            'Content-Type': 'application/json'
+            'Range': '0-49'
           }
         });
 
@@ -1392,329 +1008,368 @@
           return;
         }
 
-        const data = await res.json();
-        
-        let hasNewArrival = false;
-        data.forEach(item => {
-          if (!state.knownItemIds.has(item.id)) {
-            state.knownItemIds.add(item.id);
-            state.selectedIds.add(item.id);
-            hasNewArrival = true;
-          }
-        });
-
-        if (hasNewArrival && state.inboxItems.length > 0) {
-          showToast(`✨ New screenshot arrived!`);
-        }
-
-        state.inboxItems = data;
         el.statusPill.style.borderColor = 'var(--success-border)';
         el.statusPill.style.background = 'var(--success-bg)';
         el.statusText.textContent = 'Live (1.5s)';
 
-        renderInboxList();
+        const items = await res.json();
+        handleNewInboxItems(items || []);
+
       } catch (err) {
-        console.warn("Polling error:", err);
-        el.statusText.textContent = 'Reconnecting';
+        console.warn("Poll error:", err);
       }
     }
 
-    function startPolling() {
-      if (state.pollIntervalId) clearInterval(state.pollIntervalId);
-      pollInbox();
-      state.pollIntervalId = setInterval(pollInbox, state.pollFreqMs);
+    function handleNewInboxItems(items) {
+      state.inboxItems = items;
+      el.itemCountPill.textContent = items.length;
+
+      let newlyDiscoveredCount = 0;
+      items.forEach(item => {
+        if (!state.knownItemIds.has(item.id)) {
+          state.knownItemIds.add(item.id);
+          newlyDiscoveredCount++;
+          if (!item.is_inserted) {
+            state.selectedIds.add(item.id);
+          }
+        }
+      });
+
+      if (newlyDiscoveredCount > 0) {
+        showToast(`📸 ${newlyDiscoveredCount} new screenshot(s) beamed!`);
+      }
+
+      renderInboxList();
+      updateInsertButton();
     }
 
-    async function insertSingleItem(item) {
-      if (state.isInserting) return;
-      state.isInserting = true;
-      showToast(`Preparing ${item.file_name}...`);
+    function renderInboxList() {
+      const items = state.inboxItems;
+
+      if (!items || items.length === 0) {
+        el.emptyState.style.display = 'flex';
+        el.inboxList.innerHTML = '';
+        el.inboxList.appendChild(el.emptyState);
+        return;
+      }
+
+      el.emptyState.style.display = 'none';
+      el.inboxList.innerHTML = '';
+
+      items.forEach(item => {
+        const row = document.createElement('div');
+        row.className = `item-row ${state.selectedIds.has(item.id) ? 'selected' : ''}`;
+        row.id = `item-${item.id}`;
+
+        const isChecked = state.selectedIds.has(item.id);
+        const timeAgo = getTimeAgo(new Date(item.created_at));
+        const sizeFormatted = formatBytes(item.file_size || 0);
+
+        row.innerHTML = `
+          <input type="checkbox" class="checkbox-custom item-checkbox" data-id="${item.id}" ${isChecked ? 'checked' : ''} />
+          <img src="${item.file_url}" class="item-thumb-box" alt="Thumbnail" loading="lazy" />
+          <div class="item-details">
+            <span class="item-name" title="${item.file_name}">${item.file_name}</span>
+            <span class="item-meta">
+              <span>${timeAgo}</span>
+              <span>•</span>
+              <span>${sizeFormatted}</span>
+            </span>
+          </div>
+          <div class="item-actions">
+            ${item.is_inserted 
+              ? `<span class="badge-inserted">✓ Placed</span>` 
+              : `<button class="btn-item-insert" data-single-id="${item.id}">Insert</button>`}
+          </div>
+        `;
+
+        el.inboxList.appendChild(row);
+      });
+
+      // Bind item checkbox events
+      el.inboxList.querySelectorAll('.item-checkbox').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          const id = e.target.getAttribute('data-id');
+          if (e.target.checked) {
+            state.selectedIds.add(id);
+          } else {
+            state.selectedIds.delete(id);
+          }
+          const parentRow = document.getElementById(`item-${id}`);
+          if (parentRow) parentRow.classList.toggle('selected', e.target.checked);
+          updateInsertButton();
+        });
+      });
+
+      // Bind single item insert buttons
+      el.inboxList.querySelectorAll('[data-single-id]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute('data-single-id');
+          insertSingleScreenshot(id);
+        });
+      });
+    }
+
+    function getTimeAgo(date) {
+      const sec = Math.floor((new Date() - date) / 1000);
+      if (sec < 5) return 'just now';
+      if (sec < 60) return `${sec}s ago`;
+      const min = Math.floor(sec / 60);
+      if (min < 60) return `${min}m ago`;
+      const hr = Math.floor(min / 60);
+      return `${hr}h ago`;
+    }
+
+    function updateInsertButton() {
+      const count = state.selectedIds.size;
+      el.btnInsertBatch.disabled = count === 0 || state.isInserting;
+      el.btnInsertText.textContent = state.isInserting 
+        ? 'Beaming to Canvas...' 
+        : `Insert Selected (${count})`;
+      
+      const unplacedItems = state.inboxItems.filter(it => !it.is_inserted);
+      el.selectAllCheckbox.checked = unplacedItems.length > 0 && unplacedItems.every(it => state.selectedIds.has(it.id));
+    }
+
+    // Downscale oversized captures (>4096px) to prevent Figma canvas texture crash
+    async function fetchAndDownscaleImageBytes(imageUrl) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const MAX_DIM = 4096;
+          let w = img.naturalWidth || img.width;
+          let h = img.naturalHeight || img.height;
+
+          if (w > MAX_DIM || h > MAX_DIM) {
+            if (w > h) {
+              h = Math.round((h * MAX_DIM) / w);
+              w = MAX_DIM;
+            } else {
+              w = Math.round((w * MAX_DIM) / h);
+              h = MAX_DIM;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              reject(new Error("Failed to create blob from image"));
+              return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              resolve({
+                bytes: new Uint8Array(reader.result),
+                width: w,
+                height: h
+              });
+            };
+            reader.onerror = reject;
+            reader.readAsArrayBuffer(blob);
+          }, 'image/png');
+        };
+        img.onerror = () => reject(new Error("Failed to load image from public URL"));
+        img.src = imageUrl;
+      });
+    }
+
+    async function insertSingleScreenshot(id) {
+      const item = state.inboxItems.find(it => it.id === id);
+      if (!item) return;
 
       try {
-        const processed = await fetchAndDownscaleImage(item.file_url);
-        
-        let sectionId = el.sectionSelect.value;
-        if (sectionId === '__NEW__') {
-          const customName = el.newSectionNameInput.value.trim() || "Mobile Screenshots";
-          parent.postMessage({
-            pluginMessage: {
-              type: "CREATE_SECTION",
-              name: customName
-            }
-          }, '*');
-          await new Promise(r => setTimeout(r, 100));
-        }
+        showToast(`Placing "${item.file_name}"...`);
+        const { bytes, width, height } = await fetchAndDownscaleImageBytes(item.file_url);
+
+        const targetSection = el.sectionSelect.value;
+        const sectionId = (targetSection !== '__NEW__' && targetSection !== '__FREE__') ? targetSection : null;
 
         parent.postMessage({
           pluginMessage: {
             type: "INSERT_SINGLE_IMAGE",
             id: item.id,
             name: item.file_name,
-            bytes: processed.bytes,
-            width: processed.width,
-            height: processed.height,
-            sectionId: (sectionId !== '__NEW__' && sectionId !== '__FREE__') ? sectionId : null
+            bytes: bytes,
+            width: width,
+            height: height,
+            sectionId: sectionId
           }
         }, '*');
 
-        await markInserted([item.id]);
+        markItemsAsInserted([item.id]);
+
       } catch (err) {
-        console.error("Insert error:", err);
+        console.error("Single insert error:", err);
         showToast(`Insert failed: ${err.message}`);
-      } finally {
-        state.isInserting = false;
-        updateBatchButtonState();
       }
     }
 
-    async function insertBatchItems() {
-      if (state.isInserting) return;
-      const targetItems = state.inboxItems.filter(item => state.selectedIds.has(item.id));
-      if (targetItems.length === 0) {
-        showToast("Select at least 1 screenshot to insert");
-        return;
-      }
+    async function insertBatchScreenshots() {
+      const selectedList = state.inboxItems.filter(it => state.selectedIds.has(it.id));
+      if (selectedList.length === 0) return;
 
       state.isInserting = true;
-      el.btnInsertBatch.disabled = true;
-      el.btnInsertText.textContent = `Processing ${targetItems.length} images...`;
+      updateInsertButton();
+      showToast(`⚡ Placing ${selectedList.length} screenshots into Figma...`);
 
       try {
-        const processedList = [];
-        for (let i = 0; i < targetItems.length; i++) {
-          const item = targetItems[i];
-          el.btnInsertText.textContent = `Processing (${i + 1}/${targetItems.length})...`;
-          const result = await fetchAndDownscaleImage(item.file_url);
-          processedList.push({
-            id: item.id,
-            name: item.file_name,
-            bytes: result.bytes,
-            width: result.width,
-            height: result.height
-          });
+        const preparedItems = [];
+        for (const item of selectedList) {
+          try {
+            const { bytes, width, height } = await fetchAndDownscaleImageBytes(item.file_url);
+            preparedItems.push({
+              id: item.id,
+              name: item.file_name,
+              bytes: bytes,
+              width: width,
+              height: height
+            });
+          } catch (e) {
+            console.warn(`Failed to process ${item.file_name}:`, e);
+          }
         }
 
-        const sectionMode = el.sectionSelect.value;
-        const newSecName = el.newSectionNameInput.value.trim() || `Mobile Screenshots (${state.roomId})`;
+        if (preparedItems.length === 0) {
+          throw new Error("Could not download selected images");
+        }
+
+        const selectVal = el.sectionSelect.value;
+        let sectionId = null;
+        let newSectionName = null;
+
+        if (selectVal === '__NEW__') {
+          newSectionName = el.newSectionNameInput.value.trim() || `Screenshots (${state.roomId})`;
+        } else if (selectVal !== '__FREE__') {
+          sectionId = selectVal;
+        }
 
         parent.postMessage({
           pluginMessage: {
             type: "INSERT_BATCH",
-            items: processedList,
-            sectionId: (sectionMode !== '__NEW__' && sectionMode !== '__FREE__') ? sectionMode : null,
-            newSectionName: newSecName,
-            columns: 3
+            items: preparedItems,
+            sectionId: sectionId,
+            newSectionName: newSectionName,
+            columns: Math.min(Math.max(preparedItems.length <= 2 ? preparedItems.length : 3, 1), 5)
           }
         }, '*');
 
-        await markInserted(targetItems.map(i => i.id));
-        showToast(`✨ ${targetItems.length} screenshots placed in grid!`);
+        markItemsAsInserted(preparedItems.map(p => p.id));
+        state.selectedIds.clear();
+
       } catch (err) {
-        console.error("Batch insert error:", err);
-        showToast(`Batch failed: ${err.message}`);
+        console.error("Batch insert failed:", err);
+        showToast(`Batch insert error: ${err.message}`);
       } finally {
         state.isInserting = false;
-        updateBatchButtonState();
+        updateInsertButton();
       }
     }
 
-    async function markInserted(ids) {
-      if (!state.supabaseUrl || !state.supabaseKey || ids.length === 0) return;
+    async function markItemsAsInserted(ids) {
+      if (!ids || ids.length === 0) return;
       try {
-        for (const id of ids) {
-          await fetch(`${state.supabaseUrl}/rest/v1/dumpy_screenshots?id=eq.${id}`, {
-            method: 'PATCH',
-            headers: {
-              'apikey': state.supabaseKey,
-              'Authorization': `Bearer ${state.supabaseKey}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=minimal'
-            },
-            body: JSON.stringify({ is_inserted: true })
-          });
-        }
-        pollInbox();
-      } catch (e) {
-        console.error("Mark inserted error:", e);
-      }
-    }
-
-    async function deleteItem(id) {
-      try {
-        await fetch(`${state.supabaseUrl}/rest/v1/dumpy_screenshots?id=eq.${id}`, {
-          method: 'DELETE',
+        const updateUrl = `${state.supabaseUrl}/rest/v1/dumpy_screenshots?id=in.(${ids.join(',')})`;
+        await fetch(updateUrl, {
+          method: 'PATCH',
           headers: {
             'apikey': state.supabaseKey,
-            'Authorization': `Bearer ${state.supabaseKey}`
-          }
+            'Authorization': `Bearer ${state.supabaseKey}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ is_inserted: true })
         });
-        state.inboxItems = state.inboxItems.filter(it => it.id !== id);
-        state.selectedIds.delete(id);
-        renderInboxList();
-        showToast("Screenshot deleted");
       } catch (e) {
-        console.error("Delete error:", e);
+        console.warn("Status sync error:", e);
       }
     }
 
-    async function clearInsertedItems() {
+    function clearInsertedFromInbox() {
       const inserted = state.inboxItems.filter(it => it.is_inserted);
       if (inserted.length === 0) {
-        showToast("No inserted items to clear");
+        showToast("No placed screenshots to clear");
         return;
       }
-
-      for (const item of inserted) {
-        await deleteItem(item.id);
-      }
-      showToast(`Cleared ${inserted.length} items`);
+      state.inboxItems = state.inboxItems.filter(it => !it.is_inserted);
+      renderInboxList();
+      updateInsertButton();
+      showToast(`Cleared ${inserted.length} placed items`);
     }
 
-    // Pure Room-based system - Auth handlers removed
-
     // Event Listeners
-
-    el.btnCopyLink.addEventListener('click', () => {
-      const url = `${state.webAppUrl}/web/index.html?room=${encodeURIComponent(state.roomId)}`;
-      navigator.clipboard.writeText(url).then(() => {
-        showToast("📋 Link copied to clipboard!");
+    el.roomCodeDisplay.addEventListener('click', () => {
+      const pairingUrl = `${state.webAppUrl}/web/index.html?room=${encodeURIComponent(state.roomId)}`;
+      navigator.clipboard.writeText(state.roomId).then(() => {
+        showToast(`📋 Copied Room ${state.roomId}!`);
       }).catch(() => {
-        showToast("Room URL: " + url);
+        showToast(`Room: ${state.roomId}`);
       });
     });
 
     el.btnNewRoom.addEventListener('click', () => {
-      state.roomId = generateRoomCode();
+      state.roomId = generateSecureRoomId();
+      safeStorage.setItem('dumpy_room_id', state.roomId);
       state.knownItemIds.clear();
       state.selectedIds.clear();
       state.inboxItems = [];
-      safeStorage.setItem('dumpy_room_id', state.roomId);
       updatePairingUI();
       renderInboxList();
+      updateInsertButton();
+      showToast(`✨ Generated Room ${state.roomId}`);
+      
       parent.postMessage({
         pluginMessage: { type: "SAVE_STORAGE", key: "dumpy_room_id", value: state.roomId }
       }, '*');
-      showToast(`New room: ${state.roomId}`);
-      startPolling();
-    });
 
-    // Switch Room & Account Modal
-    el.btnSwitchRoom.addEventListener('click', () => {
-      el.inputPluginRoom.value = state.roomId;
-      el.inputPluginEmail.value = state.currentUser ? (state.currentUser.email || '') : '';
-      el.roomModal.classList.add('open');
-    });
-
-    el.btnCloseRoomModal.addEventListener('click', () => {
-      el.roomModal.classList.remove('open');
-    });
-
-    el.btnSavePluginRoom.addEventListener('click', async () => {
-      const roomVal = el.inputPluginRoom.value.trim().toUpperCase();
-
-      if (roomVal && roomVal.length >= 8) {
-        state.roomId = roomVal;
-        state.knownItemIds.clear();
-        state.selectedIds.clear();
-        state.inboxItems = [];
-        safeStorage.setItem('dumpy_room_id', state.roomId);
-        updatePairingUI();
-        renderInboxList();
-        parent.postMessage({
-          pluginMessage: { type: "SAVE_STORAGE", key: "dumpy_room_id", value: state.roomId }
-        }, '*');
-        el.roomModal.classList.remove('open');
-        showToast(`Connected to room ${state.roomId}`);
-        startPolling();
-      } else {
-        showToast('Please enter a valid Room ID (e.g., DMP-7K9X2M4P)');
-      }
+      pollInbox();
     });
 
     el.sectionSelect.addEventListener('change', () => {
-      toggleNewSectionRow();
-      parent.postMessage({
-        pluginMessage: { type: "SAVE_STORAGE", key: "dumpy_preferred_section_id", value: el.sectionSelect.value }
-      }, '*');
+      const val = el.sectionSelect.value;
+      el.newSectionInputRow.classList.toggle('active', val === '__NEW__');
+      if (val !== '__NEW__' && val !== '__FREE__') {
+        parent.postMessage({
+          pluginMessage: { type: "SAVE_STORAGE", key: "dumpy_preferred_section_id", value: val }
+        }, '*');
+      }
     });
 
     el.btnRefreshSections.addEventListener('click', () => {
       parent.postMessage({ pluginMessage: { type: "GET_SECTIONS" } }, '*');
-      showToast("Refreshed Figma sections");
+      showToast("Refreshed sections");
     });
 
     el.selectAllCheckbox.addEventListener('change', (e) => {
       if (e.target.checked) {
-        state.inboxItems.forEach(it => state.selectedIds.add(it.id));
+        state.inboxItems.filter(it => !it.is_inserted).forEach(it => state.selectedIds.add(it.id));
       } else {
         state.selectedIds.clear();
       }
       renderInboxList();
+      updateInsertButton();
     });
 
-    el.btnClearInbox.addEventListener('click', clearInsertedItems);
-    el.btnInsertBatch.addEventListener('click', insertBatchItems);
+    el.btnClearInbox.addEventListener('click', clearInsertedFromInbox);
+    el.btnInsertBatch.addEventListener('click', insertBatchScreenshots);
     el.btnManualRefresh.addEventListener('click', () => {
       pollInbox();
-      showToast("Synced with Supabase");
+      showToast("Inbox synchronized");
     });
 
-    // Settings Modal
-    el.btnSettings.addEventListener('click', () => {
-      el.settingSupabaseUrl.value = state.supabaseUrl;
-      el.settingSupabaseKey.value = state.supabaseKey;
-      el.settingWebUrl.value = state.webAppUrl;
-      el.settingsModal.classList.add('open');
-    });
-
-    el.btnCloseSettings.addEventListener('click', () => {
-      el.settingsModal.classList.remove('open');
-    });
-
-    el.btnSaveSettings.addEventListener('click', () => {
-      state.supabaseUrl = el.settingSupabaseUrl.value.trim().replace(/\/$/, '') || 'https://nivrnksfmkskmjdjzvzb.supabase.co';
-      state.supabaseKey = el.settingSupabaseKey.value.trim() || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pdnJua3NmbWtza21qZGp6dnpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxODA1NzMsImV4cCI6MjEwNTc1NjU3M30.UycIKgNMXCtoMVkrqfEbia5g2o_c6edwp1iwtIcTIO4';
-      state.webAppUrl = el.settingWebUrl.value.trim().replace(/\/$/, '') || 'https://dumpy-figma-plugin.vercel.app';
-
-      parent.postMessage({
-        pluginMessage: { type: "SAVE_STORAGE", key: "dumpy_supabase_url", value: state.supabaseUrl }
-      }, '*');
-      parent.postMessage({
-        pluginMessage: { type: "SAVE_STORAGE", key: "dumpy_supabase_key", value: state.supabaseKey }
-      }, '*');
-
-      safeStorage.setItem('dumpy_supabase_url', state.supabaseUrl);
-      safeStorage.setItem('dumpy_supabase_key', state.supabaseKey);
-      safeStorage.setItem('dumpy_web_url', state.webAppUrl);
-
-      updatePairingUI();
-      el.settingsModal.classList.remove('open');
-      showToast("Supabase credentials saved!");
-      startPolling();
-    });
-
-    el.btnResetSettings.addEventListener('click', () => {
-      el.settingSupabaseUrl.value = 'https://nivrnksfmkskmjdjzvzb.supabase.co';
-      el.settingSupabaseKey.value = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pdnJua3NmbWtza21qZGp6dnpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxODA1NzMsImV4cCI6MjEwNTc1NjU3M30.UycIKgNMXCtoMVkrqfEbia5g2o_c6edwp1iwtIcTIO4';
-      el.settingWebUrl.value = 'https://dumpy-figma-plugin.vercel.app';
-    });
-
-    // Handle messages from Figma sandbox (code.js)
+    // Handle messages from Figma Sandbox (code.js)
     window.onmessage = (event) => {
-      const msg = event.data.pluginMessage;
+      const msg = event.data ? event.data.pluginMessage : null;
       if (!msg) return;
 
       switch (msg.type) {
-        case "INIT_RESPONSE": {
-          if (msg.savedRoomId) {
-            state.roomId = msg.savedRoomId;
-          }
-          if (msg.savedSupabaseUrl) {
-            state.supabaseUrl = msg.savedSupabaseUrl;
-          }
-          if (msg.savedSupabaseKey) {
-            state.supabaseKey = msg.savedSupabaseKey;
-          }
+        case "INIT_RESPONSE":
           state.sections = msg.sections || [];
 
           if (msg.savedSectionId) {
@@ -1725,55 +1380,47 @@
           updateSectionSelect();
           startPolling();
           break;
-        }
 
-        case "SECTIONS_LIST": {
+        case "SECTIONS_LIST":
           state.sections = msg.sections || [];
           updateSectionSelect();
           break;
-        }
 
-        case "SECTION_CREATED": {
+        case "SECTION_CREATED":
           state.sections = msg.sections || [];
+          state.selectedSectionId = msg.sectionId;
           updateSectionSelect();
           el.sectionSelect.value = msg.sectionId;
-          toggleNewSectionRow();
+          el.newSectionInputRow.classList.remove('active');
           break;
-        }
 
-        case "IMAGE_INSERTED": {
-          const item = state.inboxItems.find(it => it.id === msg.id);
-          if (item) item.is_inserted = true;
-          renderInboxList();
+        case "IMAGE_INSERTED":
+          markItemsAsInserted([msg.id]);
           break;
-        }
 
-        case "BATCH_INSERTED": {
+        case "BATCH_INSERTED":
           if (msg.insertedIds) {
-            state.inboxItems.forEach(it => {
-              if (msg.insertedIds.includes(it.id)) {
-                it.is_inserted = true;
-              }
-            });
-            state.selectedIds.clear();
-            renderInboxList();
+            markItemsAsInserted(msg.insertedIds);
           }
           break;
-        }
       }
     };
 
-    // Pure Room-based initialization
+    function startPolling() {
+      if (state.pollIntervalId) clearInterval(state.pollIntervalId);
+      pollInbox();
+      state.pollIntervalId = setInterval(pollInbox, state.pollFreqMs);
+    }
+
+    // Boot
     try {
       updatePairingUI();
       updateSectionSelect();
       startPolling();
+      parent.postMessage({ pluginMessage: { type: "INIT" } }, '*');
     } catch (e) {
-      console.warn("Init render:", e);
+      console.error("Boot error:", e);
     }
-
-    // Send IPC INIT to Figma Sandbox
-    parent.postMessage({ pluginMessage: { type: "INIT" } }, '*');
   </script>
 </body>
 </html>

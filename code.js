@@ -65,19 +65,11 @@ figma.ui.onmessage = async (msg) => {
 
     switch (msg.type) {
       case "INIT": {
-        // Retrieve persistent settings from clientStorage
-        const savedRoomId = await figma.clientStorage.getAsync("dumpy_room_id");
-        const savedSupabaseUrl = await figma.clientStorage.getAsync("dumpy_supabase_url");
-        const savedSupabaseKey = await figma.clientStorage.getAsync("dumpy_supabase_key");
         const savedSectionId = await figma.clientStorage.getAsync("dumpy_preferred_section_id");
-
         const sections = getPageSections();
 
         figma.ui.postMessage({
           type: "INIT_RESPONSE",
-          savedRoomId: savedRoomId || null,
-          savedSupabaseUrl: savedSupabaseUrl || null,
-          savedSupabaseKey: savedSupabaseKey || null,
           savedSectionId: savedSectionId || null,
           sections: sections
         });
