@@ -1,6 +1,6 @@
 // ==============================================================================
-// DUMPY Mobile Web Uploader — Controller with Floating Action Buttons & Batch Beam
-// Pure Cryptographic Room Architecture with Anonymous Device Tracking
+// DUMPY Mobile Web Uploader — Controller with Fast Multi-Upload & Visitor Tracking
+// Pure Cryptographic Room Architecture with IP Visitor & Device Logging
 // ==============================================================================
 
 (function(global) {
@@ -37,9 +37,11 @@
   const state = {
     roomId: '',
     deviceId: getDeviceId(),
+    clientIp: null,
+    visitorId: null,
+    visitorPromise: null,
     config: window.getSupabaseConfig ? window.getSupabaseConfig() : {},
-    uploadQueue: [],
-    recentUploads: []
+    uploadQueue: []
   };
 
   // DOM Elements
@@ -85,6 +87,73 @@
     }
   }
 
+  // Fast Multi-Source Client IP Resolver (Parallel Race under 150ms)
+  async function resolveClientIp() {
+    if (state.clientIp) return state.clientIp;
+
+    const resolvers = [
+      fetch('https://icanhazip.com', { signal: AbortSignal.timeout(3000) }).then(r => r.text()).then(t => t.trim()),
+      fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(3000) }).then(r => r.json()).then(j => j.ip),
+      fetch('https://api64.ipify.org?format=json', { signal: AbortSignal.timeout(3000) }).then(r => r.json()).then(j => j.ip),
+      fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) }).then(r => r.json()).then(j => j.ip)
+    ];
+
+    try {
+      const ip = await Promise.any(resolvers);
+      if (ip && typeof ip === 'string' && ip.length > 3) {
+        state.clientIp = ip;
+        return ip;
+      }
+    } catch (e) {}
+
+    // Fallback if all external resolvers are blocked
+    state.clientIp = 'client-' + state.deviceId;
+    return state.clientIp;
+  }
+
+  // Record Visitor into Supabase `dumpy_visitors`
+  async function recordVisitor() {
+    try {
+      const ip = await resolveClientIp();
+      const config = window.getSupabaseConfig();
+      if (!config.url || !config.key) return null;
+
+      const visitorPayload = {
+        ip_address: ip,
+        device_id: state.deviceId,
+        user_agent: navigator.userAgent || 'Mobile Web',
+        last_seen: new Date().toISOString()
+      };
+
+      const res = await fetch(`${config.url}/rest/v1/dumpy_visitors?on_conflict=ip_address`, {
+        method: 'POST',
+        headers: {
+          'apikey': config.key,
+          'Authorization': `Bearer ${config.key}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates,return=representation'
+        },
+        body: JSON.stringify(visitorPayload)
+      });
+
+      if (res.ok) {
+        const rows = await res.json();
+        if (rows && rows[0] && rows[0].id) {
+          state.visitorId = rows[0].id;
+          return state.visitorId;
+        }
+      }
+    } catch (e) {
+      console.warn('Visitor tracking error:', e);
+    }
+    return null;
+  }
+
+  // Start visitor tracking on page launch
+  function initVisitorTracking() {
+    state.visitorPromise = recordVisitor();
+  }
+
   // Show Toast
   function showToast(msg, duration = 2400) {
     if (!el.toastBar || !el.toastText) return;
@@ -98,21 +167,6 @@
     if (navigator.vibrate) {
       try { navigator.vibrate(30); } catch (e) {}
     }
-  }
-
-  // Read natural image dimensions
-  function getImageDimensions(file) {
-    return new Promise((resolve) => {
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = () => {
-        resolve({ width: img.naturalWidth || 0, height: img.naturalHeight || 0, previewUrl: url });
-      };
-      img.onerror = () => {
-        resolve({ width: 0, height: 0, previewUrl: url });
-      };
-      img.src = url;
-    });
   }
 
   // Resolve clean MIME type for any file format
@@ -139,13 +193,12 @@
     return mimeMap[ext] || 'image/png';
   }
 
-  // Direct Supabase Storage + Database Upload
+  // High-Speed Direct Supabase Storage + Database Upload
   async function uploadScreenshot(fileItem) {
-    const { file, id } = fileItem;
+    const { file, id, cardEl } = fileItem;
     const config = window.getSupabaseConfig();
-    const itemCard = document.getElementById(`upload-${id}`);
-    const progressBar = itemCard ? itemCard.querySelector('.progress-bar') : null;
-    const statusBadge = itemCard ? itemCard.querySelector('.queue-status-badge') : null;
+    const progressBar = cardEl ? cardEl.querySelector('.progress-bar') : null;
+    const statusBadge = cardEl ? cardEl.querySelector('.queue-status-badge') : null;
 
     if (!config.url || !config.key) {
       if (statusBadge) {
@@ -162,7 +215,7 @@
       const storagePath = `${encodeURIComponent(state.roomId)}/${timestamp}_${sanitizedName}`;
       const mimeType = getEffectiveMimeType(file);
       
-      if (progressBar) progressBar.style.width = '35%';
+      if (progressBar) progressBar.style.width = '40%';
 
       // 1. Upload to Supabase Storage via REST API
       const uploadUrl = `${config.url}/storage/v1/object/${config.bucket}/${storagePath}`;
@@ -186,17 +239,22 @@
         } catch (e) {}
 
         if (parsedMessage.includes('mime type') || parsedMessage.includes('invalid_mime_type')) {
-          throw new Error(`Storage bucket MIME restriction: ${parsedMessage}. Update bucket allowed_mime_types in Supabase.`);
+          throw new Error(`Storage bucket MIME restriction: ${parsedMessage}`);
         }
         throw new Error(`Storage upload failed (${uploadResponse.status}): ${parsedMessage}`);
       }
 
-      if (progressBar) progressBar.style.width = '75%';
+      if (progressBar) progressBar.style.width = '80%';
 
-      // 2. Public CDN link
+      // 2. Ensure visitor record is ready
+      if (!state.visitorId && state.visitorPromise) {
+        try { await state.visitorPromise; } catch(e) {}
+      }
+
+      // 3. Public CDN link
       const publicUrl = `${config.url}/storage/v1/object/public/${config.bucket}/${storagePath}`;
 
-      // 3. Insert metadata record into `dumpy_screenshots` table
+      // 4. Insert metadata record into `dumpy_screenshots` table
       const insertUrl = `${config.url}/rest/v1/dumpy_screenshots`;
       const recordPayload = {
         room_id: state.roomId,
@@ -207,9 +265,10 @@
         mime_type: mimeType,
         is_inserted: false
       };
-      if (state.deviceId) {
-        recordPayload.device_id = state.deviceId;
-      }
+
+      if (state.deviceId) recordPayload.device_id = state.deviceId;
+      if (state.clientIp) recordPayload.client_ip = state.clientIp;
+      if (state.visitorId) recordPayload.visitor_id = state.visitorId;
 
       let dbResponse = await fetch(insertUrl, {
         method: 'POST',
@@ -222,11 +281,24 @@
         body: JSON.stringify(recordPayload)
       });
 
-      // Smart fallback: if table schema cache is missing device_id or other optional columns, retry without it
-      if (!dbResponse.ok && recordPayload.device_id) {
-        const errorCopy = await dbResponse.clone().text();
-        if (errorCopy.includes('device_id') || errorCopy.includes('PGRST204')) {
+      // Smart fallback: if table schema cache is missing newer columns (visitor_id, device_id), retry cleanly
+      if (!dbResponse.ok) {
+        const errText = await dbResponse.text();
+        let needsRetry = false;
+        if (errText.includes('visitor_id') && recordPayload.visitor_id) {
+          delete recordPayload.visitor_id;
+          needsRetry = true;
+        }
+        if (errText.includes('device_id') && recordPayload.device_id) {
           delete recordPayload.device_id;
+          needsRetry = true;
+        }
+        if (errText.includes('client_ip') && recordPayload.client_ip) {
+          delete recordPayload.client_ip;
+          needsRetry = true;
+        }
+
+        if (needsRetry) {
           dbResponse = await fetch(insertUrl, {
             method: 'POST',
             headers: {
@@ -238,11 +310,10 @@
             body: JSON.stringify(recordPayload)
           });
         }
-      }
 
-      if (!dbResponse.ok) {
-        const dbErrText = await dbResponse.text();
-        throw new Error(`Database record failed: ${dbErrText}`);
+        if (!dbResponse.ok) {
+          throw new Error(`Database record failed: ${await dbResponse.text()}`);
+        }
       }
 
       if (progressBar) progressBar.style.width = '100%';
@@ -265,13 +336,15 @@
     }
   }
 
-  // Handle incoming file list (Single & Multiple Selection)
+  // Handle incoming file list (Ultra-Fast Concurrent Batch Upload)
   async function handleFiles(fileList) {
     if (!fileList || fileList.length === 0) return;
 
-    const validFiles = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+    const validFiles = Array.from(fileList).filter(f => f.type.startsWith('image/') || f.name.match(/\.(png|jpe?g|webp|gif|svg|heic|heif|avif|bmp)$/i));
     if (validFiles.length === 0) return;
 
+    // HIDE Empty State Dropzone & SHOW Upload Activity
+    if (el.uploadCard) el.uploadCard.style.display = 'none';
     if (el.queueSection) el.queueSection.style.display = 'block';
 
     state.uploadQueue.push(...validFiles);
@@ -279,34 +352,26 @@
       el.queueCountBadge.textContent = `${state.uploadQueue.length} file${state.uploadQueue.length > 1 ? 's' : ''}`;
     }
 
-    const uploadPromises = [];
+    const uploadItems = [];
 
+    // Instant UI card instantiation without blocking for image decode
     for (let i = 0; i < validFiles.length; i++) {
       const file = validFiles[i];
       const fileId = 'f_' + Math.random().toString(36).substring(2, 9);
-      const dimensions = await getImageDimensions(file);
-
-      const fileItem = {
-        id: fileId,
-        file: file,
-        width: dimensions.width,
-        height: dimensions.height,
-        previewUrl: dimensions.previewUrl
-      };
+      const previewUrl = URL.createObjectURL(file);
 
       const card = document.createElement('div');
       card.className = 'queue-card';
       card.id = `upload-${fileId}`;
 
       const sizeStr = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
-      const dimStr = dimensions.width && dimensions.height ? `${dimensions.width}×${dimensions.height}` : 'Image';
 
       card.innerHTML = `
-        <img src="${dimensions.previewUrl}" class="queue-thumb" alt="Preview" />
+        <img src="${previewUrl}" class="queue-thumb" alt="Preview" />
         <div class="queue-info">
           <div class="queue-filename" title="${file.name}">${file.name}</div>
           <div class="queue-meta">
-            <span>${dimStr}</span>
+            <span class="dim-text">Image</span>
             <span>•</span>
             <span>${sizeStr}</span>
           </div>
@@ -324,10 +389,26 @@
       `;
 
       if (el.queueList) el.queueList.prepend(card);
-      uploadPromises.push(uploadScreenshot(fileItem));
+
+      // Async dimension resolution in background
+      const img = new Image();
+      img.onload = () => {
+        const dimEl = card.querySelector('.dim-text');
+        if (dimEl && img.naturalWidth && img.naturalHeight) {
+          dimEl.textContent = `${img.naturalWidth}×${img.naturalHeight}`;
+        }
+      };
+      img.src = previewUrl;
+
+      uploadItems.push({
+        id: fileId,
+        file: file,
+        cardEl: card
+      });
     }
 
-    await Promise.allSettled(uploadPromises);
+    // Launch all uploads concurrently in parallel
+    await Promise.allSettled(uploadItems.map(item => uploadScreenshot(item)));
   }
 
   // Event Listeners
@@ -401,7 +482,7 @@
     });
   }
 
-  // 4. Room Code Click to Copy (No 'Room' or 'ID' label)
+  // 4. Room Code Click to Copy
   if (el.roomCodeDisplay) {
     el.roomCodeDisplay.addEventListener('click', () => {
       navigator.clipboard.writeText(state.roomId).then(() => {
@@ -412,12 +493,13 @@
     });
   }
 
-  // 5. Clear Activity Button
+  // 5. Clear Activity Button -> Restores Empty State Dropzone
   if (el.btnClearQueue) {
     el.btnClearQueue.addEventListener('click', () => {
       state.uploadQueue = [];
       if (el.queueList) el.queueList.innerHTML = '';
       if (el.queueSection) el.queueSection.style.display = 'none';
+      if (el.uploadCard) el.uploadCard.style.display = 'flex';
       if (el.queueCountBadge) el.queueCountBadge.textContent = '0 files';
       showToast('Activity cleared');
     });
@@ -433,4 +515,5 @@
 
   // Boot
   initRoomId();
+  initVisitorTracking();
 })(window);

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dumpy — Real-Time Screenshot Inbox</title>
+  <title>Dumpy — Screenshot Inbox</title>
   
   <!-- DM Sans Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,45 +12,27 @@
   
   <style>
     :root {
-      /* Clean Figma Native / Sapphire Surface Palette */
-      --bg-page: #FFFFFF;
-      --bg-surface: #FFFFFF;
-      --bg-surface-hover: #F8FAFC;
+      --bg: #FFFFFF;
+      --bg-hover: #F8FAFC;
       --bg-subtle: #F1F5F9;
-      --bg-accent-subtle: #EFF6FF;
-      
       --primary: #2563EB;
       --primary-hover: #1D4ED8;
-      --primary-gradient: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
       --primary-light: #EFF6FF;
       --primary-border: #BFDBFE;
-      --primary-glow: rgba(37, 99, 235, 0.2);
-      
       --success: #059669;
       --success-bg: #ECFDF5;
       --success-border: #A7F3D0;
-      
       --danger: #DC2626;
       --danger-bg: #FEF2F2;
       --danger-border: #FECACA;
-      
-      --text-main: #0F172A;
-      --text-secondary: #475569;
+      --text: #0F172A;
+      --text-sec: #475569;
       --text-muted: #94A3B8;
-      
       --border: #E2E8F0;
       --border-light: #F1F5F9;
-      --border-focus: #3B82F6;
-      
-      --radius-xs: 4px;
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
-      
-      --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-      --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
-      --shadow-md: 0 8px 20px -3px rgba(15, 23, 42, 0.08);
-      --shadow-primary: 0 4px 14px rgba(37, 99, 235, 0.25);
+      --radius-xs: 6px;
+      --radius-sm: 10px;
+      --radius-full: 9999px;
     }
 
     * {
@@ -62,10 +44,10 @@
     }
 
     body {
-      background-color: var(--bg-page);
-      color: var(--text-main);
-      font-size: 13px;
-      line-height: 1.45;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -73,610 +55,11 @@
       user-select: none;
     }
 
-    /* Scrollbars */
-    ::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #CBD5E1;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94A3B8;
-    }
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
 
-    /* Top App Header */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      background: var(--bg-surface);
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .logo-badge {
-      width: 26px;
-      height: 26px;
-      border-radius: 7px;
-      background: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #FFFFFF;
-      box-shadow: 0 2px 6px var(--primary-glow);
-    }
-    .logo-badge .icon {
-      width: 15px;
-      height: 15px;
-    }
-
-    .brand-text {
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: -0.3px;
-      color: var(--text-main);
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .status-pill {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 8px;
-      border-radius: 20px;
-      background: var(--success-bg);
-      border: 1px solid var(--success-border);
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--success);
-    }
-
-    .status-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 6px rgba(5, 150, 105, 0.4);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-
-    /* Main Scrollable Surface */
-    .main-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 14px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    /* 1. Centered Pairing Section (On Surface) */
-    .pairing-surface {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 10px;
-      padding: 6px 0 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .qr-frame {
-      width: 136px;
-      height: 136px;
-      background: #FFFFFF;
-      padding: 5px;
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-sm);
-      position: relative;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      cursor: pointer;
-    }
-    .qr-frame:hover {
-      transform: scale(1.02);
-      box-shadow: var(--shadow-md);
-      border-color: var(--primary-border);
-    }
-    .qr-frame svg, .qr-frame img {
-      width: 100% !important;
-      height: 100% !important;
-      display: block;
-      object-fit: contain;
-    }
-
-    .room-code-group {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .room-code-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-family: monospace;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--primary);
-      background: var(--primary-light);
-      padding: 4px 10px;
-      border-radius: var(--radius-xs);
-      border: 1px solid var(--primary-border);
-      cursor: pointer;
-      letter-spacing: 0.5px;
-      transition: all 0.15s ease;
-    }
-    .room-code-badge:hover {
-      background: #DBEAFE;
-    }
-    .room-code-badge:active {
-      transform: scale(0.96);
-    }
-
-    .copy-icon {
-      width: 12px;
-      height: 12px;
-      stroke: var(--primary);
-      opacity: 0.75;
-    }
-
-    .icon-btn-subtle {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      width: 26px;
-      height: 26px;
-      border-radius: var(--radius-xs);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      box-shadow: var(--shadow-xs);
-    }
-    .icon-btn-subtle:hover {
-      background: var(--bg-surface-hover);
-      color: var(--text-main);
-      border-color: #CBD5E1;
-    }
-    .icon-btn-subtle:active {
-      transform: scale(0.94);
-    }
-
-    .pairing-caption {
-      font-size: 11px;
-      color: var(--text-muted);
-      line-height: 1.3;
-    }
-
-    /* 2. Destination Section Row (Surface Level) */
-    .section-surface-row {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .surface-label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .select-wrapper {
-      position: relative;
-      display: flex;
-      width: 100%;
-    }
-
-    .custom-select {
-      width: 100%;
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      padding: 7px 28px 7px 10px;
-      border-radius: var(--radius-xs);
-      font-size: 12px;
-      font-weight: 500;
-      outline: none;
-      appearance: none;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .custom-select:focus {
-      border-color: var(--primary);
-      background: #FFFFFF;
-    }
-
-    .select-chevron {
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-      color: var(--text-muted);
-      width: 14px;
-      height: 14px;
-    }
-
-    .new-section-row {
-      display: none;
-      gap: 6px;
-    }
-    .new-section-row.active {
-      display: flex;
-    }
-
-    .text-input {
-      flex: 1;
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      padding: 7px 10px;
-      border-radius: var(--radius-xs);
-      font-size: 12px;
-      outline: none;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .text-input:focus {
-      border-color: var(--primary);
-      background: #FFFFFF;
-    }
-
-    /* 3. Live Inbox Section (Surface Level) */
-    .inbox-surface-section {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      flex: 1;
-    }
-
-    .inbox-header-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 2px 0;
-    }
-
-    .inbox-title-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .inbox-heading {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-main);
-      letter-spacing: -0.2px;
-    }
-
-    .count-pill {
-      background: var(--primary-light);
-      color: var(--primary);
-      font-size: 11px;
-      font-weight: 700;
-      padding: 1px 6px;
-      border-radius: 10px;
-      border: 1px solid var(--primary-border);
-    }
-
-    .inbox-controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      cursor: pointer;
-    }
-
-    .checkbox-custom {
-      appearance: none;
-      width: 14px;
-      height: 14px;
-      border: 1px solid var(--border);
-      background: var(--bg-surface);
-      border-radius: 3px;
-      cursor: pointer;
-      position: relative;
-      outline: none;
-      transition: all 0.15s ease;
-    }
-    .checkbox-custom:checked {
-      background: var(--primary);
-      border-color: var(--primary);
-    }
-    .checkbox-custom:checked::after {
-      content: '';
-      position: absolute;
-      left: 4px;
-      top: 1px;
-      width: 4px;
-      height: 8px;
-      border: solid white;
-      border-width: 0 1.5px 1.5px 0;
-      transform: rotate(45deg);
-    }
-
-    .icon-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-secondary);
-      width: 24px;
-      height: 24px;
-      border-radius: var(--radius-xs);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .icon-btn:hover {
-      background: var(--bg-surface-hover);
-      color: var(--text-main);
-    }
-
-    /* Inbox List & Items */
-    .inbox-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .empty-state {
-      padding: 24px 16px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .empty-icon-wrap {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: var(--bg-subtle);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      margin-bottom: 2px;
-    }
-
-    .empty-text {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    .empty-sub {
-      font-size: 11px;
-      color: var(--text-muted);
-      max-width: 240px;
-      line-height: 1.35;
-    }
-
-    /* Screenshot Item Row */
-    .item-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      transition: all 0.15s ease;
-      position: relative;
-    }
-    .item-row:hover {
-      border-color: #CBD5E1;
-      background: var(--bg-surface-hover);
-    }
-    .item-row.selected {
-      border-color: var(--primary-border);
-      background: #F8FAFF;
-    }
-
-    .item-thumb-box {
-      width: 36px;
-      height: 36px;
-      border-radius: var(--radius-xs);
-      object-fit: cover;
-      flex-shrink: 0;
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-    }
-
-    .item-details {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      min-width: 0;
-    }
-
-    .item-name {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-main);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .item-meta {
-      font-size: 10px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .item-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .btn-item-insert {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 4px 8px;
-      border-radius: var(--radius-xs);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .btn-item-insert:hover {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: #FFFFFF;
-    }
-
-    .badge-inserted {
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--success);
-      background: var(--success-bg);
-      border: 1px solid var(--success-border);
-      padding: 2px 6px;
-      border-radius: var(--radius-xs);
-    }
-
-    /* Bottom Action Bar */
-    .footer {
-      padding: 10px 14px 12px 14px;
-      background: var(--bg-surface);
-      border-top: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .btn-primary {
-      width: 100%;
-      background: var(--primary);
-      border: none;
-      color: #FFFFFF;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 9px 14px;
-      border-radius: var(--radius-xs);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      box-shadow: var(--shadow-primary);
-      transition: all 0.15s ease;
-    }
-    .btn-primary:hover:not(:disabled) {
-      filter: brightness(1.05);
-      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
-    }
-    .btn-primary:active:not(:disabled) {
-      transform: scale(0.98);
-    }
-    .btn-primary:disabled {
-      background: #E2E8F0;
-      color: #94A3B8;
-      box-shadow: none;
-      cursor: not-allowed;
-    }
-
-    .footer-subrow {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 10px;
-      color: var(--text-muted);
-      padding: 0 2px;
-    }
-
-    .link-sub {
-      cursor: pointer;
-      color: var(--text-secondary);
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      transition: color 0.15s;
-    }
-    .link-sub:hover {
-      color: var(--primary);
-    }
-
-    /* Toast Notification */
-    .toast {
-      position: fixed;
-      bottom: 64px;
-      left: 50%;
-      transform: translateX(-50%) translateY(10px);
-      background: rgba(15, 23, 42, 0.94);
-      color: #FFFFFF;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      box-shadow: var(--shadow-md);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 200;
-      white-space: nowrap;
-    }
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* SVG Icon Helper */
+    /* Icons */
     .icon {
       width: 14px;
       height: 14px;
@@ -688,11 +71,520 @@
       display: inline-block;
       flex-shrink: 0;
     }
+
+    /* Top App Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: -0.2px;
+    }
+
+    .logo-badge {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+    }
+    .logo-badge .icon { width: 12px; height: 12px; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--success);
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+    /* Main Surface */
+    .main-surface {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Accordion / Collapsible Pairing Beacon */
+    .beacon-surface {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: #FFFFFF;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .beacon-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: var(--bg-hover);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-sec);
+    }
+    .beacon-header:hover { background: var(--bg-subtle); color: var(--text); }
+
+    .beacon-header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .beacon-toggle-icon {
+      transition: transform 0.2s ease;
+      color: var(--text-muted);
+    }
+    .beacon-surface.collapsed .beacon-toggle-icon {
+      transform: rotate(-90deg);
+    }
+
+    .beacon-body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+      padding: 10px 10px 12px 10px;
+    }
+    .beacon-surface.collapsed .beacon-body {
+      display: none;
+    }
+
+    .qr-box {
+      width: 108px;
+      height: 108px;
+      background: #FFFFFF;
+      padding: 4px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .qr-box:hover { transform: scale(1.02); border-color: var(--primary-border); }
+    .qr-box svg, .qr-box img { width: 100% !important; height: 100% !important; display: block; }
+
+    .room-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .room-code-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      padding: 4px 9px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.4px;
+      transition: background 0.15s;
+    }
+    .room-code-tag:hover { background: #DBEAFE; }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-sec);
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-xs);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .icon-btn:hover { background: var(--bg-hover); color: var(--text); border-color: #CBD5E1; }
+
+    .beacon-hint {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Destination Placement */
+    .placement-surface {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .placement-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-sec);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .select-wrap {
+      position: relative;
+      display: flex;
+      width: 100%;
+    }
+
+    .surface-select {
+      width: 100%;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 26px 6px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 11px;
+      font-weight: 500;
+      outline: none;
+      appearance: none;
+      cursor: pointer;
+    }
+    .surface-select:focus { border-color: var(--primary); background: #FFFFFF; }
+
+    .select-chevron {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text-muted);
+      width: 12px;
+      height: 12px;
+    }
+
+    .surface-input {
+      display: none;
+      width: 100%;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 8px;
+      border-radius: var(--radius-xs);
+      font-size: 11px;
+      outline: none;
+      margin-top: 4px;
+    }
+    .surface-input.active { display: block; }
+    .surface-input:focus { border-color: var(--primary); background: #FFFFFF; }
+
+    /* Live Inbox Section */
+    .inbox-surface {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      min-height: 180px;
+    }
+
+    .inbox-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2px;
+    }
+
+    .inbox-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .inbox-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .count-tag {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--primary-border);
+    }
+
+    .inbox-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-sec);
+      cursor: pointer;
+    }
+
+    .custom-cb {
+      appearance: none;
+      width: 13px;
+      height: 13px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      outline: none;
+      background: #FFFFFF;
+    }
+    .custom-cb:checked { background: var(--primary); border-color: var(--primary); }
+    .custom-cb:checked::after {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 1px;
+      width: 3px;
+      height: 6px;
+      border: solid white;
+      border-width: 0 1.5px 1.5px 0;
+      transform: rotate(45deg);
+    }
+
+    .btn-del-selected {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: var(--danger);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .btn-del-selected:hover { background: #FEE2E2; }
+
+    /* Screenshot Item Rows */
+    .inbox-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .item-card {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .item-card:hover { background: var(--bg-hover); border-color: #CBD5E1; }
+    .item-card.selected { background: #F8FAFF; border-color: var(--primary-border); }
+
+    .item-thumb {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      object-fit: cover;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .item-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+
+    .item-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-sub {
+      font-size: 9px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 4px;
+    }
+
+    .item-btns {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .btn-insert-single {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      color: var(--text-sec);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-insert-single:hover { background: var(--primary); border-color: var(--primary); color: #FFFFFF; }
+
+    .btn-delete-single {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-xs);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-delete-single:hover { background: var(--danger-bg); color: var(--danger); }
+
+    .badge-placed {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--success);
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      padding: 2px 6px;
+      border-radius: var(--radius-xs);
+    }
+
+    /* Empty state */
+    .empty-box {
+      padding: 24px 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-muted);
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .empty-box .icon { width: 22px; height: 22px; margin-bottom: 2px; }
+
+    /* Footer Action */
+    .footer {
+      padding: 8px 14px 10px 14px;
+      border-top: 1px solid var(--border);
+      background: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .btn-main {
+      width: 100%;
+      background: var(--primary);
+      border: none;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .btn-main:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-main:disabled { background: #E2E8F0; color: #94A3B8; cursor: not-allowed; }
+
+    .footer-sub {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .link-action { cursor: pointer; color: var(--text-sec); }
+    .link-action:hover { color: var(--primary); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 56px;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.2s ease;
+      z-index: 100;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Top App Header -->
   <header class="header">
     <div class="brand">
       <div class="logo-badge">
@@ -700,727 +592,570 @@
           <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
         </svg>
       </div>
-      <span class="brand-text">Dumpy</span>
+      <span>Dumpy</span>
     </div>
-    
-    <div class="header-actions">
-      <div class="status-pill" id="statusPill" title="Live Supabase sync active">
-        <span class="status-dot"></span>
-        <span id="statusText">Live (1.5s)</span>
-      </div>
+
+    <div class="status-badge" id="statusBadge" title="Supabase live sync active">
+      <span class="status-dot"></span>
+      <span id="statusText">Live</span>
     </div>
   </header>
 
-  <!-- Main Scrollable Surface -->
-  <main class="main-content">
+  <!-- Main Surface Content -->
+  <main class="main-surface">
 
-    <!-- 1. Centered Device Pairing Surface -->
-    <div class="pairing-surface">
-      <div class="qr-frame" id="qrContainer" title="Scan with phone camera to beam screenshots"></div>
-      
-      <div class="room-code-group">
-        <div class="room-code-badge" id="roomCodeDisplay" title="Tap to copy Room Code">
-          <span id="roomCodeText">DMP-........</span>
-          <svg class="icon copy-icon" viewBox="0 0 24 24">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-          </svg>
+    <!-- 1. Pairing Beacon (Collapsible Accordion) -->
+    <section class="beacon-surface" id="beaconCard">
+      <div class="beacon-header" id="beaconToggleHeader">
+        <div class="beacon-header-left">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>Pairing Beacon</span>
         </div>
-        <button class="icon-btn-subtle" id="btnNewRoom" title="Generate New Room Code">
-          <svg class="icon" viewBox="0 0 24 24">
-            <path d="M23 4v6h-6M1 20v-6h6"/>
-            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-          </svg>
-        </button>
+        <svg class="icon beacon-toggle-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
 
-      <p class="pairing-caption">Scan with your phone to beam screenshots directly to this canvas.</p>
-    </div>
+      <div class="beacon-body">
+        <div class="qr-box" id="qrContainer" title="Scan with phone camera to beam photos"></div>
 
-    <!-- 2. Destination Figma Section Selector (Surface Level) -->
-    <div class="section-surface-row">
-      <div class="surface-label">
+        <div class="room-row">
+          <div class="room-code-tag" id="roomCodeDisplay" title="Tap to copy Room Code">
+            <span id="roomCodeText">DMP-........</span>
+            <svg class="icon" viewBox="0 0 24 24" style="width:11px; height:11px;">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+            </svg>
+          </div>
+
+          <button class="icon-btn" id="btnNewRoom" title="Generate New Room Code">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M23 4v6h-6M1 20v-6h6"/>
+              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+            </svg>
+          </button>
+        </div>
+
+        <span class="beacon-hint">Scan with camera to beam screenshots straight here</span>
+      </div>
+    </section>
+
+    <!-- 2. Target Section Destination -->
+    <section class="placement-surface">
+      <div class="placement-header">
         <span>Target Section</span>
-        <span class="link-sub" id="btnRefreshSections" title="Refresh Page Sections">
-          <svg class="icon" viewBox="0 0 24 24">
-            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l5.67-5.67"/>
-          </svg>
-          Refresh
-        </span>
+        <span class="link-action" id="btnRefreshSections">↻ Refresh</span>
       </div>
 
-      <div class="select-wrapper">
-        <select class="custom-select" id="sectionSelect">
+      <div class="select-wrap">
+        <select class="surface-select" id="sectionSelect">
           <option value="__NEW__">➕ Create New Section...</option>
           <option value="__FREE__">📌 Free Canvas (No Section)</option>
         </select>
-        <svg class="icon select-chevron" viewBox="0 0 24 24">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
+        <svg class="icon select-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
 
-      <div class="new-section-row active" id="newSectionInputRow">
-        <input type="text" class="text-input" id="newSectionNameInput" placeholder="Section Name" value="Mobile Screenshots" />
-      </div>
-    </div>
+      <input type="text" class="surface-input active" id="newSectionNameInput" placeholder="Section Name" value="Mobile Screenshots" />
+    </section>
 
-    <!-- 3. Live Inbox Section (Surface Level) -->
-    <div class="inbox-surface-section">
-      <div class="inbox-header-row">
-        <div class="inbox-title-group">
-          <span class="inbox-heading">Inbox</span>
-          <span class="count-pill" id="itemCountPill">0</span>
+    <!-- 3. Live Screenshots Inbox -->
+    <section class="inbox-surface">
+      <div class="inbox-bar">
+        <div class="inbox-title-wrap">
+          <span class="inbox-title">Inbox</span>
+          <span class="count-tag" id="itemCountTag">0</span>
         </div>
-        <div class="inbox-controls">
-          <label class="checkbox-label" id="selectAllLabel">
-            <input type="checkbox" class="checkbox-custom" id="selectAllCheckbox" checked>
+
+        <div class="inbox-tools">
+          <label class="checkbox-wrap">
+            <input type="checkbox" class="custom-cb" id="selectAllCb" checked>
             <span>Select All</span>
           </label>
-          <button class="icon-btn" id="btnClearInbox" title="Clear Inserted Screenshots">
-            <svg class="icon" viewBox="0 0 24 24">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-            </svg>
+
+          <button class="btn-del-selected" id="btnDeleteSelected" title="Delete selected from Supabase">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            <span>Delete (<span id="deleteCountText">0</span>)</span>
           </button>
         </div>
       </div>
 
-      <!-- Screenshots List -->
       <div class="inbox-list" id="inboxList">
-        <div class="empty-state" id="emptyState">
-          <div class="empty-icon-wrap">
-            <svg class="icon" style="width: 18px; height: 18px;" viewBox="0 0 24 24">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-              <polyline points="17 8 12 3 7 8"/>
-              <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-          </div>
-          <div class="empty-text">Inbox is empty</div>
-          <p class="empty-sub">Snap or select screenshots on your phone to see them appear live.</p>
+        <div class="empty-box" id="emptyState">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <span style="font-weight: 600; color: var(--text-sec);">Inbox is empty</span>
+          <span style="font-size: 10px;">Photos beamed from mobile will appear here live</span>
         </div>
       </div>
-    </div>
+    </section>
 
   </main>
 
-  <!-- Bottom Insert Actions -->
+  <!-- Bottom Fixed Footer Action -->
   <footer class="footer">
-    <button class="btn-primary" id="btnInsertBatch" disabled>
-      <svg class="icon" viewBox="0 0 24 24">
-        <path d="M12 5v14M5 12h14"/>
-      </svg>
+    <button class="btn-main" id="btnInsertBatch" disabled>
+      <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
       <span id="btnInsertText">Insert Selected (0)</span>
     </button>
-    <div class="footer-subrow">
-      <span>Auto-polling (1.5s)</span>
-      <span class="link-sub" id="btnManualRefresh">
-        <svg class="icon" viewBox="0 0 24 24">
-          <path d="M23 4v6h-6M1 20v-6h6"/>
-          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-        </svg>
-        Sync Now
-      </span>
+    <div class="footer-sub">
+      <span>Auto-sync active</span>
+      <span class="link-action" id="btnSyncNow">Sync Now</span>
     </div>
   </footer>
 
-  <!-- Toast Notification -->
-  <div class="toast" id="toastMessage">
-    <svg class="icon" viewBox="0 0 24 24" style="color: #60A5FA;">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-      <polyline points="22 4 12 14.01 9 11.01"/>
-    </svg>
-    <span id="toastText">Room Code copied!</span>
+  <!-- Floating Toast Notification -->
+  <div class="toast" id="toastBox">
+    <span id="toastMsg">Notification</span>
   </div>
 
-  <!-- Official Compliant QRCode Generator (Kazuhiko Arase, Offline Vector SVG) -->
+  <!-- Kazuhiko Arase Offline Vector QR Engine -->
   <script>
-    var qrcode=(function(){var P=function(x,w){var g=236,l=17,n=x,s=O[w],t=null,r=0,h=null,i=[],v={},_=function(a,f){r=n*4+17,t=(function(e){for(var u=new Array(e),o=0;o<e;o+=1){u[o]=new Array(e);for(var d=0;d<e;d+=1)u[o][d]=null}return u})(r),B(0,0),B(r-7,0),B(0,r-7),E(),T(),m(a,f),n>=7&&N(a),h==null&&(h=nr(n,s,i)),U(h,f)},B=function(a,f){for(var e=-1;e<=7;e+=1)if(!(a+e<=-1||r<=a+e))for(var u=-1;u<=7;u+=1)f+u<=-1||r<=f+u||(0<=e&&e<=6&&(u==0||u==6)||0<=u&&u<=6&&(e==0||e==6)||2<=e&&e<=4&&2<=u&&u<=4?t[a+e][f+u]=!0:t[a+e][f+u]=!1)},y=function(){for(var a=0,f=0,e=0;e<8;e+=1){_(!0,e);var u=k.getLostPoint(v);(e==0||a>u)&&(a=u,f=e)}return f},T=function(){for(var a=8;a<r-8;a+=1)t[a][6]==null&&(t[a][6]=a%2==0);for(var f=8;f<r-8;f+=1)t[6][f]==null&&(t[6][f]=f%2==0)},E=function(){for(var a=k.getPatternPosition(n),f=0;f<a.length;f+=1)for(var e=0;e<a.length;e+=1){var u=a[f],o=a[e];if(t[u][o]==null)for(var d=-2;d<=2;d+=1)for(var c=-2;c<=2;c+=1)d==-2||d==2||c==-2||c==2||d==0&&c==0?t[u+d][o+c]=!0:t[u+d][o+c]=!1}},N=function(a){for(var f=k.getBCHTypeNumber(n),e=0;e<18;e+=1){var u=!a&&(f>>e&1)==1;t[Math.floor(e/3)][e%3+r-8-3]=u}for(var e=0;e<18;e+=1){var u=!a&&(f>>e&1)==1;t[e%3+r-8-3][Math.floor(e/3)]=u}},m=function(a,f){for(var e=s<<3|f,u=k.getBCHTypeInfo(e),o=0;o<15;o+=1){var d=!a&&(u>>o&1)==1;o<6?t[o][8]=d:o<8?t[o+1][8]=d:t[r-15+o][8]=d}for(var o=0;o<15;o+=1){var d=!a&&(u>>o&1)==1;o<8?t[8][r-o-1]=d:o<9?t[8][15-o-1+1]=d:t[8][15-o-1]=d}t[r-8][8]=!a},U=function(a,f){for(var e=-1,u=r-1,o=7,d=0,c=k.getMaskFunction(f),p=r-1;p>0;p-=2)for(p==6&&(p-=1);;){for(var b=0;b<2;b+=1)if(t[u][p-b]==null){var C=!1;d<a.length&&(C=(a[d]>>>o&1)==1);var A=c(u,p-b);A&&(C=!C),t[u][p-b]=C,o-=1,o==-1&&(d+=1,o=7)}if(u+=e,u<0||r<=u){u-=e,e=-e;break}}},H=function(a,f){for(var e=0,u=0,o=0,d=new Array(f.length),c=new Array(f.length),p=0;p<f.length;p+=1){var b=f[p].dataCount,C=f[p].totalCount-b;u=Math.max(u,b),o=Math.max(o,C),d[p]=new Array(b);for(var A=0;A<d[p].length;A+=1)d[p][A]=255&a.getBuffer()[A+e];e+=b;var R=k.getErrorCorrectPolynomial(C),I=K(d[p],R.getLength()-1),S=I.mod(R);c[p]=new Array(R.getLength()-1);for(var A=0;A<c[p].length;A+=1){var X=A+S.getLength()-c[p].length;c[p][A]=X>=0?S.getAt(X):0}}for(var Z=0,A=0;A<f.length;A+=1)Z+=f[A].totalCount;for(var J=new Array(Z),Q=0,A=0;A<u;A+=1)for(var p=0;p<f.length;p+=1)A<d[p].length&&(J[Q]=d[p][A],Q+=1);for(var A=0;A<o;A+=1)for(var p=0;p<f.length;p+=1)A<c[p].length&&(J[Q]=c[p][A],Q+=1);return J},nr=function(a,f,e){for(var u=Y.getRSBlocks(a,f),o=G(),d=0;d<e.length;d+=1){var c=e[d];o.put(c.getMode(),4),o.put(c.getLength(),k.getLengthInBits(c.getMode(),a)),c.write(o)}for(var p=0,d=0;d<u.length;d+=1)p+=u[d].dataCount;if(o.getLengthInBits()>p*8)throw"code length overflow. ("+o.getLengthInBits()+">"+p*8+")";for(o.getLengthInBits()+4<=p*8&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=p*8||(o.put(g,8),o.getLengthInBits()>=p*8));)o.put(l,8);return H(o,u)};v.addData=function(a,f){f=f||"Byte";var e=null;switch(f){case"Numeric":e=$(a);break;case"Alphanumeric":e=W(a);break;case"Byte":e=V(a);break;case"Kanji":e=q(a);break;default:throw"mode:"+f}i.push(e),h=null},v.isDark=function(a,f){if(a<0||r<=a||f<0||r<=f)throw a+","+f;return t[a][f]},v.getModuleCount=function(){return r},v.make=function(){if(n<1){for(var a=1;a<40;a++){for(var f=Y.getRSBlocks(a,s),e=G(),u=0;u<i.length;u++){var o=i[u];e.put(o.getMode(),4),e.put(o.getLength(),k.getLengthInBits(o.getMode(),a)),o.write(e)}for(var d=0,u=0;u<f.length;u++)d+=f[u].dataCount;if(e.getLengthInBits()<=d*8)break}n=a}_(!1,y())};v.createSvgTag=function(a,f){a=a||2;f=typeof f>"u"?a*4:f;var d=v.getModuleCount()*a+f*2,b,C,p,A="";for(var R="l"+a+",0 0,"+a+" -"+a+",0 0,-"+a+"z ",A='<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+d+" "+d+'" preserveAspectRatio="xMinYMin meet"><rect width="100%" height="100%" fill="white"/><path d="',b=0;b<v.getModuleCount();b+=1)for(C=b*a+f,c=0;c<v.getModuleCount();c+=1)v.isDark(b,c)&&(p=c*a+f,A+="M"+p+","+C+R);return A+='" stroke="transparent" fill="#0F172A"/></svg>'};return v};P.stringToBytesFuncs={default:function(x){for(var w=[],g=0;g<x.length;g+=1){var l=x.charCodeAt(g);w.push(l&255)}return w}},P.stringToBytes=P.stringToBytesFuncs.default;var D={MODE_NUMBER:1,MODE_ALPHA_NUM:2,MODE_8BIT_BYTE:4,MODE_KANJI:8},O={L:1,M:0,Q:3,H:2},L={PATTERN000:0,PATTERN001:1,PATTERN010:2,PATTERN011:3,PATTERN100:4,PATTERN101:5,PATTERN110:6,PATTERN111:7},k=(function(){var x=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],w=1335,g=7973,l=21522,n={},s=function(t){for(var r=0;t!=0;)r+=1,t>>>=1;return r};return n.getBCHTypeInfo=function(t){for(var r=t<<10;s(r)-s(w)>=0;)r^=w<<s(r)-s(w);return(t<<10|r)^l},n.getBCHTypeNumber=function(t){for(var r=t<<12;s(r)-s(g)>=0;)r^=g<<s(r)-s(g);return t<<12|r},n.getPatternPosition=function(t){return x[t-1]},n.getMaskFunction=function(t){switch(t){case L.PATTERN000:return function(r,h){return(r+h)%2==0};case L.PATTERN001:return function(r,h){return r%2==0};case L.PATTERN010:return function(r,h){return h%3==0};case L.PATTERN011:return function(r,h){return(r+h)%3==0};case L.PATTERN100:return function(r,h){return(Math.floor(r/2)+Math.floor(h/3))%2==0};case L.PATTERN101:return function(r,h){return r*h%2+r*h%3==0};case L.PATTERN110:return function(r,h){return(r*h%2+r*h%3)%2==0};case L.PATTERN111:return function(r,h){return(r*h%3+(r+h)%2)%2==0};default:throw"bad maskPattern:"+t}},n.getErrorCorrectPolynomial=function(t){for(var r=K([1],0),h=0;h<t;h+=1)r=r.multiply(K([1,M.gexp(h)],0));return r},n.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case D.MODE_NUMBER:return 10;case D.MODE_ALPHA_NUM:return 9;case D.MODE_8BIT_BYTE:return 8;case D.MODE_KANJI:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case D.MODE_NUMBER:return 12;case D.MODE_ALPHA_NUM:return 11;case D.MODE_8BIT_BYTE:return 16;case D.MODE_KANJI:return 10;default:throw"mode:"+t}else if(r<41)switch(t){case D.MODE_NUMBER:return 14;case D.MODE_ALPHA_NUM:return 13;case D.MODE_8BIT_BYTE:return 16;case D.MODE_KANJI:return 12;default:throw"mode:"+t}else throw"type:"+r},n.getLostPoint=function(t){for(var r=t.getModuleCount(),h=0,i=0;i<r;i+=1)for(var v=0;v<r;v+=1){for(var _=0,B=t.isDark(i,v),y=-1;y<=1;y+=1)if(!(i+y<0||r<=i+y))for(var T=-1;T<=1;T+=1)v+T<0||r<=v+T||y==0&&T==0||B==t.isDark(i+y,v+T)&&(_+=1);_>5&&(h+=3+_-5)}for(var i=0;i<r-1;i+=1)for(var v=0;v<r-1;v+=1){var E=0;t.isDark(i,v)&&(E+=1),t.isDark(i+1,v)&&(E+=1),t.isDark(i,v+1)&&(E+=1),t.isDark(i+1,v+1)&&(E+=1),(E==0||E==4)&&(h+=3)}for(var i=0;i<r-6;i+=1)for(var v=0;v<r;v+=1)t.isDark(i,v)&&!t.isDark(i+1,v)&&t.isDark(i+2,v)&&t.isDark(i+3,v)&&t.isDark(i+4,v)&&!t.isDark(i+5,v)&&t.isDark(i+6,v)&&(h+=40);for(var v=0;v<r-6;v+=1)for(var i=0;i<r;i+=1)t.isDark(i,v)&&!t.isDark(i,v+1)&&t.isDark(i,v+2)&&t.isDark(i,v+3)&&t.isDark(i,v+4)&&!t.isDark(i,v+5)&&t.isDark(i,v+6)&&(h+=40);for(var N=0,v=0;v<r;v+=1)for(var i=0;i<r;i+=1)t.isDark(i,v)&&(N+=1);var m=Math.abs(100*N/r/r-50)/5;return h+=m*10,h},n})(),M=(function(){for(var x=new Array(256),w=new Array(256),g=0;g<8;g+=1)x[g]=1<<g;for(var g=8;g<256;g+=1)x[g]=x[g-4]^x[g-5]^x[g-6]^x[g-8];for(var g=0;g<255;g+=1)w[x[g]]=g;var l={};return l.glog=function(n){if(n<1)throw"glog("+n+")";return w[n]},l.gexp=function(n){for(;n<0;)n+=255;for(;n>=256;)n-=255;return x[n]},l})();function K(x,w){if(typeof x.length>"u")throw x.length+"/"+w;var g=(function(){for(var n=0;n<x.length&&x[n]==0;)n+=1;for(var s=new Array(x.length-n+w),t=0;t<x.length-n;t+=1)s[t]=x[t+n];return s})(),l={};return l.getAt=function(n){return g[n]},l.getLength=function(){return g.length},l.multiply=function(n){for(var s=new Array(l.getLength()+n.getLength()-1),t=0;t<l.getLength();t+=1)for(var r=0;r<n.getLength();r+=1)s[t+r]^=M.gexp(M.glog(l.getAt(t))+M.glog(n.getAt(r)));return K(s,0)},l.mod=function(n){if(l.getLength()-n.getLength()<0)return l;for(var s=M.glog(l.getAt(0))-M.glog(n.getAt(0)),t=new Array(l.getLength()),r=0;r<l.getLength();r+=1)t[r]=l.getAt(r);for(var r=0;r<n.getLength();r+=1)t[r]^=M.gexp(M.glog(n.getAt(r))+s);return K(t,0).mod(n)},l}var Y=(function(){var x=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],w=function(n,s){var t={};return t.totalCount=n,t.dataCount=s,t},g={},l=function(n,s){switch(s){case O.L:return x[(n-1)*4+0];case O.M:return x[(n-1)*4+1];case O.Q:return x[(n-1)*4+2];case O.H:return x[(n-1)*4+3];default:return}};return g.getRSBlocks=function(n,s){var t=l(n,s);if(typeof t>"u")throw"bad rs block @ typeNumber:"+n+"/errorCorrectionLevel:"+s;for(var r=t.length/3,h=[],i=0;i<r;i+=1)for(var v=t[i*3+0],_=t[i*3+1],B=t[i*3+2],y=0;y<v;y+=1)h.push(w(_,B));return h},g})(),G=function(){var x=[],w=0,g={};return g.getBuffer=function(){return x},g.getAt=function(l){var n=Math.floor(l/8);return(x[n]>>>7-l%8&1)==1},g.put=function(l,n){for(var s=0;s<n;s+=1)g.putBit((l>>>n-s-1&1)==1)},g.getLengthInBits=function(){return w},g.putBit=function(l){var n=Math.floor(w/8);x.length<=n&&x.push(0),l&&(x[n]|=128>>>w%8),w+=1},g},$=function(x){var w=D.MODE_NUMBER,g=x,l={};l.getMode=function(){return w},l.getLength=function(t){return g.length},l.write=function(t){for(var r=g,h=0;h+2<r.length;)t.put(n(r.substring(h,h+3)),10),h+=3;h<r.length&&(r.length-h==1?t.put(n(r.substring(h,h+1)),4):r.length-h==2&&t.put(n(r.substring(h,h+2)),7))};var n=function(t){for(var r=0,h=0;h<t.length;h+=1)r=r*10+s(t.charAt(h));return r},s=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-48;throw"illegal char :"+t};return l},W=function(x){var w=D.MODE_ALPHA_NUM,g=x,l={};l.getMode=function(){return w},l.getLength=function(s){return g.length},l.write=function(s){for(var t=g,r=0;r+1<t.length;)s.put(n(t.charAt(r))*45+n(t.charAt(r+1)),11),r+=2;r<t.length&&s.put(n(t.charAt(r)),6)};var n=function(s){if("0"<=s&&s<="9")return s.charCodeAt(0)-48;if("A"<=s&&s<="Z")return s.charCodeAt(0)-65+10;switch(s){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+s}};return l},V=function(x){var w=D.MODE_8BIT_BYTE,g=x,l=P.stringToBytes(x),n={};return n.getMode=function(){return w},n.getLength=function(s){return l.length},n.write=function(s){for(var t=0;t<l.length;t+=1)s.put(l[t],8)},n},q=function(x){var w=D.MODE_KANJI,g=x,l=P.stringToBytesFuncs.SJIS;if(!l)throw"sjis not supported.";(function(t,r){var h=l(t);if(h.length!=2||(h[0]<<8|h[1])!=r)throw"sjis not supported."})("\u53CB",38726);var n=l(x),s={};return s.getMode=function(){return w},s.getLength=function(t){return~~(n.length/2)},s.write=function(t){for(var r=n,h=0;h+1<r.length;){var i=(255&r[h])<<8|255&r[h+1];if(33088<=i&&i<=40956)i-=33088;else if(57408<=i&&i<=60351)i-=49472;else throw"illegal char at "+(h+1)+"/"+i;i=(i>>>8&255)*192+(i&255),t.put(i,13),h+=2}if(h<r.length)throw"illegal char at "+(h+1)},s};return P})();
-    (function(){qrcode.stringToBytesFuncs["UTF-8"]=function(P){function D(O){for(var L=[],k=0;k<O.length;k++){var M=O.charCodeAt(k);M<128?L.push(M):M<2048?L.push(192|M>>6,128|M&63):M<55296||M>=57344?L.push(224|M>>12,128|M>>6&63,128|M&63):(k++,M=65536+((M&1023)<<10|O.charCodeAt(k)&1023),L.push(240|M>>18,128|M>>12&63,128|M>>6&63,128|M&63))}return L}return D(P)}})();
-
+var qrcode=(function(){var P=function(x,w){var g=236,l=17,n=x,s=O[w],t=null,r=0,h=null,i=[],v={},_=function(a,f){r=n*4+17,t=(function(e){for(var u=new Array(e),o=0;o<e;o+=1){u[o]=new Array(e);for(var d=0;d<e;d+=1)u[o][d]=null}return u})(r),B(0,0),B(r-7,0),B(0,r-7),E(),T(),m(a,f),n>=7&&N(a),h==null&&(h=nr(n,s,i)),U(h,f)},B=function(a,f){for(var e=-1;e<=7;e+=1)if(!(a+e<=-1||r<=a+e))for(var u=-1;u<=7;u+=1)f+u<=-1||r<=f+u||(0<=e&&e<=6&&(u==0||u==6)||0<=u&&u<=6&&(e==0||e==6)||2<=e&&e<=4&&2<=u&&u<=4?t[a+e][f+u]=!0:t[a+e][f+u]=!1)},y=function(){for(var a=0,f=0,e=0;e<8;e+=1){_(!0,e);var u=k.getLostPoint(v);(e==0||a>u)&&(a=u,f=e)}return f},T=function(){for(var a=8;a<r-8;a+=1)t[a][6]==null&&(t[a][6]=a%2==0);for(var f=8;f<r-8;f+=1)t[6][f]==null&&(t[6][f]=f%2==0)},E=function(){for(var a=k.getPatternPosition(n),f=0;f<a.length;f+=1)for(var e=0;e<a.length;e+=1){var u=a[f],o=a[e];if(t[u][o]==null)for(var d=-2;d<=2;d+=1)for(var c=-2;c<=2;c+=1)d==-2||d==2||c==-2||c==2||d==0&&c==0?t[u+d][o+c]=!0:t[u+d][o+c]=!1}},N=function(a){for(var f=k.getBCHTypeNumber(n),e=0;e<18;e+=1){var u=!a&&(f>>e&1)==1;t[Math.floor(e/3)][e%3+r-8-3]=u}for(var e=0;e<18;e+=1){var u=!a&&(f>>e&1)==1;t[e%3+r-8-3][Math.floor(e/3)]=u}},m=function(a,f){for(var e=s<<3|f,u=k.getBCHTypeInfo(e),o=0;o<15;o+=1){var d=!a&&(u>>o&1)==1;o<6?t[o][8]=d:o<8?t[o+1][8]=d:t[r-15+o][8]=d}for(var o=0;o<15;o+=1){var d=!a&&(u>>o&1)==1;o<8?t[8][r-o-1]=d:o<9?t[8][15-o-1+1]=d:t[8][15-o-1]=d}t[r-8][8]=!a},U=function(a,f){for(var e=-1,u=r-1,o=7,d=0,c=k.getMaskFunction(f),p=r-1;p>0;p-=2)for(p==6&&(p-=1);;){for(var b=0;b<2;b+=1)if(t[u][p-b]==null){var C=!1;d<a.length&&(C=(a[d]>>>o&1)==1);var A=c(u,p-b);A&&(C=!C),t[u][p-b]=C,o-=1,o==-1&&(d+=1,o=7)}if(u+=e,u<0||r<=u){u-=e,e=-e;break}}},H=function(a,f){for(var e=0,u=0,o=0,d=new Array(f.length),c=new Array(f.length),p=0;p<f.length;p+=1){var b=f[p].dataCount,C=f[p].totalCount-b;u=Math.max(u,b),o=Math.max(o,C),d[p]=new Array(b);for(var A=0;A<d[p].length;A+=1)d[p][A]=255&a.getBuffer()[A+e];e+=b;var R=k.getErrorCorrectPolynomial(C),I=K(d[p],R.getLength()-1),S=I.mod(R);c[p]=new Array(R.getLength()-1);for(var A=0;A<c[p].length;A+=1){var X=A+S.getLength()-c[p].length;c[p][A]=X>=0?S.getAt(X):0}}for(var Z=0,A=0;A<f.length;A+=1)Z+=f[A].totalCount;for(var J=new Array(Z),Q=0,A=0;A<u;A+=1)for(var p=0;p<f.length;p+=1)A<d[p].length&&(J[Q]=d[p][A],Q+=1);for(var A=0;A<o;A+=1)for(var p=0;p<f.length;p+=1)A<c[p].length&&(J[Q]=c[p][A],Q+=1);return J},nr=function(a,f,e){for(var u=Y.getRSBlocks(a,f),o=G(),d=0;d<e.length;d+=1){var c=e[d];o.put(c.getMode(),4),o.put(c.getLength(),k.getLengthInBits(c.getMode(),a)),c.write(o)}for(var p=0,d=0;d<u.length;d+=1)p+=u[d].dataCount;if(o.getLengthInBits()>p*8)throw"code length overflow. ("+o.getLengthInBits()+">"+p*8+")";for(o.getLengthInBits()+4<=p*8&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=p*8||(o.put(g,8),o.getLengthInBits()>=p*8));)o.put(l,8);return H(o,u)};v.addData=function(a,f){f=f||"Byte";var e=null;switch(f){case"Numeric":e=$(a);break;case"Alphanumeric":e=W(a);break;case"Byte":e=V(a);break;case"Kanji":e=q(a);break;default:throw"mode:"+f}i.push(e),h=null},v.isDark=function(a,f){if(a<0||r<=a||f<0||r<=f)throw a+","+f;return t[a][f]},v.getModuleCount=function(){return r},v.make=function(){if(n<1){for(var a=1;a<40;a++){for(var f=Y.getRSBlocks(a,s),e=G(),u=0;u<i.length;u++){var o=i[u];e.put(o.getMode(),4),e.put(o.getLength(),k.getLengthInBits(o.getMode(),a)),o.write(e)}for(var d=0,u=0;u<f.length;u++)d+=f[u].dataCount;if(e.getLengthInBits()<=d*8)break}n=a}_(!1,y())},v.createTableTag=function(a,f){a=a||2,f=typeof f>"u"?a*4:f;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+f+"px;",e+='">',e+="<tbody>";for(var u=0;u<v.getModuleCount();u+=1){e+="<tr>";for(var o=0;o<v.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+a+"px;",e+=" height: "+a+"px;",e+=" background-color: ",e+=v.isDark(u,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>",e},v.createSvgTag=function(a,f,e,u){var o={};typeof arguments[0]=="object"&&(o=arguments[0],a=o.cellSize,f=o.margin,e=o.alt,u=o.title),a=a||2,f=typeof f>"u"?a*4:f,e=typeof e=="string"?{text:e}:e||{},e.text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,u=typeof u=="string"?{text:u}:u||{},u.text=u.text||null,u.id=u.text?u.id||"qrcode-title":null;var d=v.getModuleCount()*a+f*2,c,p,b,C,A="",R;for(R="l"+a+",0 0,"+a+" -"+a+",0 0,-"+a+"z ",A+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',A+=o.scalable?"":' width="'+d+'px" height="'+d+'px"',A+=' viewBox="0 0 '+d+" "+d+'" ',A+=' preserveAspectRatio="xMinYMin meet"',A+=u.text||e.text?' role="img" aria-labelledby="'+F([u.id,e.id].join(" ").trim())+'"':"",A+=">",A+=u.text?'<title id="'+F(u.id)+'">'+F(u.text)+"</title>":"",A+=e.text?'<description id="'+F(e.id)+'">'+F(e.text)+"</description>":"",A+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',A+='<path d="',b=0;b<v.getModuleCount();b+=1)for(C=b*a+f,c=0;c<v.getModuleCount();c+=1)v.isDark(b,c)&&(p=c*a+f,A+="M"+p+","+C+R);return A+='" stroke="transparent" fill="black"/>',A+="</svg>",A},v.createDataURL=function(a,f){a=a||2,f=typeof f>"u"?a*4:f;var e=v.getModuleCount()*a+f*2,u=f,o=e-f;return er(e,e,function(d,c){if(u<=d&&d<o&&u<=c&&c<o){var p=Math.floor((d-u)/a),b=Math.floor((c-u)/a);return v.isDark(b,p)?0:1}else return 1})},v.createImgTag=function(a,f,e){a=a||2,f=typeof f>"u"?a*4:f;var u=v.getModuleCount()*a+f*2,o="";return o+="<img",o+=' src="',o+=v.createDataURL(a,f),o+='"',o+=' width="',o+=u,o+='"',o+=' height="',o+=u,o+='"',e&&(o+=' alt="',o+=F(e),o+='"'),o+="/>",o};var F=function(a){for(var f="",e=0;e<a.length;e+=1){var u=a.charAt(e);switch(u){case"<":f+="&lt;";break;case">":f+="&gt;";break;case"&":f+="&amp;";break;case'"':f+="&quot;";break;default:f+=u;break}}return f},ar=function(a){var f=1;a=typeof a>"u"?f*2:a;var e=v.getModuleCount()*f+a*2,u=a,o=e-a,d,c,p,b,C,A={"\u2588\u2588":"\u2588","\u2588 ":"\u2580"," \u2588":"\u2584","  ":" "},R={"\u2588\u2588":"\u2580","\u2588 ":"\u2580"," \u2588":" ","  ":" "},I="";for(d=0;d<e;d+=2){for(p=Math.floor((d-u)/f),b=Math.floor((d+1-u)/f),c=0;c<e;c+=1)C="\u2588",u<=c&&c<o&&u<=d&&d<o&&v.isDark(p,Math.floor((c-u)/f))&&(C=" "),u<=c&&c<o&&u<=d+1&&d+1<o&&v.isDark(b,Math.floor((c-u)/f))?C+=" ":C+="\u2588",I+=a<1&&d+1>=o?R[C]:A[C];I+=`
+`}return e%2&&a>0?I.substring(0,I.length-e-1)+Array(e+1).join("\u2580"):I.substring(0,I.length-1)};return v.createASCII=function(a,f){if(a=a||1,a<2)return ar(f);a-=1,f=typeof f>"u"?a*2:f;var e=v.getModuleCount()*a+f*2,u=f,o=e-f,d,c,p,b,C=Array(a+1).join("\u2588\u2588"),A=Array(a+1).join("  "),R="",I="";for(d=0;d<e;d+=1){for(p=Math.floor((d-u)/a),I="",c=0;c<e;c+=1)b=1,u<=c&&c<o&&u<=d&&d<o&&v.isDark(p,Math.floor((c-u)/a))&&(b=0),I+=b?C:A;for(p=0;p<a;p+=1)R+=I+`
+`}return R.substring(0,R.length-1)},v.renderTo2dContext=function(a,f){f=f||2;for(var e=v.getModuleCount(),u=0;u<e;u++)for(var o=0;o<e;o++)a.fillStyle=v.isDark(u,o)?"black":"white",a.fillRect(o*f,u*f,f,f)},v};P.stringToBytesFuncs={default:function(x){for(var w=[],g=0;g<x.length;g+=1){var l=x.charCodeAt(g);w.push(l&255)}return w}},P.stringToBytes=P.stringToBytesFuncs.default,P.createStringToBytes=function(x,w){var g=(function(){for(var n=rr(x),s=function(){var T=n.read();if(T==-1)throw"eof";return T},t=0,r={};;){var h=n.read();if(h==-1)break;var i=s(),v=s(),_=s(),B=String.fromCharCode(h<<8|i),y=v<<8|_;r[B]=y,t+=1}if(t!=w)throw t+" != "+w;return r})(),l=63;return function(n){for(var s=[],t=0;t<n.length;t+=1){var r=n.charCodeAt(t);if(r<128)s.push(r);else{var h=g[n.charAt(t)];typeof h=="number"?(h&255)==h?s.push(h):(s.push(h>>>8),s.push(h&255)):s.push(l)}}return s}};var D={MODE_NUMBER:1,MODE_ALPHA_NUM:2,MODE_8BIT_BYTE:4,MODE_KANJI:8},O={L:1,M:0,Q:3,H:2},L={PATTERN000:0,PATTERN001:1,PATTERN010:2,PATTERN011:3,PATTERN100:4,PATTERN101:5,PATTERN110:6,PATTERN111:7},k=(function(){var x=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],w=1335,g=7973,l=21522,n={},s=function(t){for(var r=0;t!=0;)r+=1,t>>>=1;return r};return n.getBCHTypeInfo=function(t){for(var r=t<<10;s(r)-s(w)>=0;)r^=w<<s(r)-s(w);return(t<<10|r)^l},n.getBCHTypeNumber=function(t){for(var r=t<<12;s(r)-s(g)>=0;)r^=g<<s(r)-s(g);return t<<12|r},n.getPatternPosition=function(t){return x[t-1]},n.getMaskFunction=function(t){switch(t){case L.PATTERN000:return function(r,h){return(r+h)%2==0};case L.PATTERN001:return function(r,h){return r%2==0};case L.PATTERN010:return function(r,h){return h%3==0};case L.PATTERN011:return function(r,h){return(r+h)%3==0};case L.PATTERN100:return function(r,h){return(Math.floor(r/2)+Math.floor(h/3))%2==0};case L.PATTERN101:return function(r,h){return r*h%2+r*h%3==0};case L.PATTERN110:return function(r,h){return(r*h%2+r*h%3)%2==0};case L.PATTERN111:return function(r,h){return(r*h%3+(r+h)%2)%2==0};default:throw"bad maskPattern:"+t}},n.getErrorCorrectPolynomial=function(t){for(var r=K([1],0),h=0;h<t;h+=1)r=r.multiply(K([1,M.gexp(h)],0));return r},n.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case D.MODE_NUMBER:return 10;case D.MODE_ALPHA_NUM:return 9;case D.MODE_8BIT_BYTE:return 8;case D.MODE_KANJI:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case D.MODE_NUMBER:return 12;case D.MODE_ALPHA_NUM:return 11;case D.MODE_8BIT_BYTE:return 16;case D.MODE_KANJI:return 10;default:throw"mode:"+t}else if(r<41)switch(t){case D.MODE_NUMBER:return 14;case D.MODE_ALPHA_NUM:return 13;case D.MODE_8BIT_BYTE:return 16;case D.MODE_KANJI:return 12;default:throw"mode:"+t}else throw"type:"+r},n.getLostPoint=function(t){for(var r=t.getModuleCount(),h=0,i=0;i<r;i+=1)for(var v=0;v<r;v+=1){for(var _=0,B=t.isDark(i,v),y=-1;y<=1;y+=1)if(!(i+y<0||r<=i+y))for(var T=-1;T<=1;T+=1)v+T<0||r<=v+T||y==0&&T==0||B==t.isDark(i+y,v+T)&&(_+=1);_>5&&(h+=3+_-5)}for(var i=0;i<r-1;i+=1)for(var v=0;v<r-1;v+=1){var E=0;t.isDark(i,v)&&(E+=1),t.isDark(i+1,v)&&(E+=1),t.isDark(i,v+1)&&(E+=1),t.isDark(i+1,v+1)&&(E+=1),(E==0||E==4)&&(h+=3)}for(var i=0;i<r;i+=1)for(var v=0;v<r-6;v+=1)t.isDark(i,v)&&!t.isDark(i,v+1)&&t.isDark(i,v+2)&&t.isDark(i,v+3)&&t.isDark(i,v+4)&&!t.isDark(i,v+5)&&t.isDark(i,v+6)&&(h+=40);for(var v=0;v<r;v+=1)for(var i=0;i<r-6;i+=1)t.isDark(i,v)&&!t.isDark(i+1,v)&&t.isDark(i+2,v)&&t.isDark(i+3,v)&&t.isDark(i+4,v)&&!t.isDark(i+5,v)&&t.isDark(i+6,v)&&(h+=40);for(var N=0,v=0;v<r;v+=1)for(var i=0;i<r;i+=1)t.isDark(i,v)&&(N+=1);var m=Math.abs(100*N/r/r-50)/5;return h+=m*10,h},n})(),M=(function(){for(var x=new Array(256),w=new Array(256),g=0;g<8;g+=1)x[g]=1<<g;for(var g=8;g<256;g+=1)x[g]=x[g-4]^x[g-5]^x[g-6]^x[g-8];for(var g=0;g<255;g+=1)w[x[g]]=g;var l={};return l.glog=function(n){if(n<1)throw"glog("+n+")";return w[n]},l.gexp=function(n){for(;n<0;)n+=255;for(;n>=256;)n-=255;return x[n]},l})();function K(x,w){if(typeof x.length>"u")throw x.length+"/"+w;var g=(function(){for(var n=0;n<x.length&&x[n]==0;)n+=1;for(var s=new Array(x.length-n+w),t=0;t<x.length-n;t+=1)s[t]=x[t+n];return s})(),l={};return l.getAt=function(n){return g[n]},l.getLength=function(){return g.length},l.multiply=function(n){for(var s=new Array(l.getLength()+n.getLength()-1),t=0;t<l.getLength();t+=1)for(var r=0;r<n.getLength();r+=1)s[t+r]^=M.gexp(M.glog(l.getAt(t))+M.glog(n.getAt(r)));return K(s,0)},l.mod=function(n){if(l.getLength()-n.getLength()<0)return l;for(var s=M.glog(l.getAt(0))-M.glog(n.getAt(0)),t=new Array(l.getLength()),r=0;r<l.getLength();r+=1)t[r]=l.getAt(r);for(var r=0;r<n.getLength();r+=1)t[r]^=M.gexp(M.glog(n.getAt(r))+s);return K(t,0).mod(n)},l}var Y=(function(){var x=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],w=function(n,s){var t={};return t.totalCount=n,t.dataCount=s,t},g={},l=function(n,s){switch(s){case O.L:return x[(n-1)*4+0];case O.M:return x[(n-1)*4+1];case O.Q:return x[(n-1)*4+2];case O.H:return x[(n-1)*4+3];default:return}};return g.getRSBlocks=function(n,s){var t=l(n,s);if(typeof t>"u")throw"bad rs block @ typeNumber:"+n+"/errorCorrectionLevel:"+s;for(var r=t.length/3,h=[],i=0;i<r;i+=1)for(var v=t[i*3+0],_=t[i*3+1],B=t[i*3+2],y=0;y<v;y+=1)h.push(w(_,B));return h},g})(),G=function(){var x=[],w=0,g={};return g.getBuffer=function(){return x},g.getAt=function(l){var n=Math.floor(l/8);return(x[n]>>>7-l%8&1)==1},g.put=function(l,n){for(var s=0;s<n;s+=1)g.putBit((l>>>n-s-1&1)==1)},g.getLengthInBits=function(){return w},g.putBit=function(l){var n=Math.floor(w/8);x.length<=n&&x.push(0),l&&(x[n]|=128>>>w%8),w+=1},g},$=function(x){var w=D.MODE_NUMBER,g=x,l={};l.getMode=function(){return w},l.getLength=function(t){return g.length},l.write=function(t){for(var r=g,h=0;h+2<r.length;)t.put(n(r.substring(h,h+3)),10),h+=3;h<r.length&&(r.length-h==1?t.put(n(r.substring(h,h+1)),4):r.length-h==2&&t.put(n(r.substring(h,h+2)),7))};var n=function(t){for(var r=0,h=0;h<t.length;h+=1)r=r*10+s(t.charAt(h));return r},s=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-48;throw"illegal char :"+t};return l},W=function(x){var w=D.MODE_ALPHA_NUM,g=x,l={};l.getMode=function(){return w},l.getLength=function(s){return g.length},l.write=function(s){for(var t=g,r=0;r+1<t.length;)s.put(n(t.charAt(r))*45+n(t.charAt(r+1)),11),r+=2;r<t.length&&s.put(n(t.charAt(r)),6)};var n=function(s){if("0"<=s&&s<="9")return s.charCodeAt(0)-48;if("A"<=s&&s<="Z")return s.charCodeAt(0)-65+10;switch(s){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+s}};return l},V=function(x){var w=D.MODE_8BIT_BYTE,g=x,l=P.stringToBytes(x),n={};return n.getMode=function(){return w},n.getLength=function(s){return l.length},n.write=function(s){for(var t=0;t<l.length;t+=1)s.put(l[t],8)},n},q=function(x){var w=D.MODE_KANJI,g=x,l=P.stringToBytesFuncs.SJIS;if(!l)throw"sjis not supported.";(function(t,r){var h=l(t);if(h.length!=2||(h[0]<<8|h[1])!=r)throw"sjis not supported."})("\u53CB",38726);var n=l(x),s={};return s.getMode=function(){return w},s.getLength=function(t){return~~(n.length/2)},s.write=function(t){for(var r=n,h=0;h+1<r.length;){var i=(255&r[h])<<8|255&r[h+1];if(33088<=i&&i<=40956)i-=33088;else if(57408<=i&&i<=60351)i-=49472;else throw"illegal char at "+(h+1)+"/"+i;i=(i>>>8&255)*192+(i&255),t.put(i,13),h+=2}if(h<r.length)throw"illegal char at "+(h+1)},s},j=function(){var x=[],w={};return w.writeByte=function(g){x.push(g&255)},w.writeShort=function(g){w.writeByte(g),w.writeByte(g>>>8)},w.writeBytes=function(g,l,n){l=l||0,n=n||g.length;for(var s=0;s<n;s+=1)w.writeByte(g[s+l])},w.writeString=function(g){for(var l=0;l<g.length;l+=1)w.writeByte(g.charCodeAt(l))},w.toByteArray=function(){return x},w.toString=function(){var g="";g+="[";for(var l=0;l<x.length;l+=1)l>0&&(g+=","),g+=x[l];return g+="]",g},w},z=function(){var x=0,w=0,g=0,l="",n={},s=function(r){l+=String.fromCharCode(t(r&63))},t=function(r){if(!(r<0)){if(r<26)return 65+r;if(r<52)return 97+(r-26);if(r<62)return 48+(r-52);if(r==62)return 43;if(r==63)return 47}throw"n:"+r};return n.writeByte=function(r){for(x=x<<8|r&255,w+=8,g+=1;w>=6;)s(x>>>w-6),w-=6},n.flush=function(){if(w>0&&(s(x<<6-w),x=0,w=0),g%3!=0)for(var r=3-g%3,h=0;h<r;h+=1)l+="="},n.toString=function(){return l},n},rr=function(x){var w=x,g=0,l=0,n=0,s={};s.read=function(){for(;n<8;){if(g>=w.length){if(n==0)return-1;throw"unexpected end of file./"+n}var r=w.charAt(g);if(g+=1,r=="=")return n=0,-1;if(r.match(/^\s$/))continue;l=l<<6|t(r.charCodeAt(0)),n+=6}var h=l>>>n-8&255;return n-=8,h};var t=function(r){if(65<=r&&r<=90)return r-65;if(97<=r&&r<=122)return r-97+26;if(48<=r&&r<=57)return r-48+52;if(r==43)return 62;if(r==47)return 63;throw"c:"+r};return s},tr=function(x,w){var g=x,l=w,n=new Array(x*w),s={};s.setPixel=function(i,v,_){n[v*g+i]=_},s.write=function(i){i.writeString("GIF87a"),i.writeShort(g),i.writeShort(l),i.writeByte(128),i.writeByte(0),i.writeByte(0),i.writeByte(0),i.writeByte(0),i.writeByte(0),i.writeByte(255),i.writeByte(255),i.writeByte(255),i.writeString(","),i.writeShort(0),i.writeShort(0),i.writeShort(g),i.writeShort(l),i.writeByte(0);var v=2,_=r(v);i.writeByte(v);for(var B=0;_.length-B>255;)i.writeByte(255),i.writeBytes(_,B,255),B+=255;i.writeByte(_.length-B),i.writeBytes(_,B,_.length-B),i.writeByte(0),i.writeString(";")};var t=function(i){var v=i,_=0,B=0,y={};return y.write=function(T,E){if(T>>>E)throw"length over";for(;_+E>=8;)v.writeByte(255&(T<<_|B)),E-=8-_,T>>>=8-_,B=0,_=0;B=T<<_|B,_=_+E},y.flush=function(){_>0&&v.writeByte(B)},y},r=function(i){for(var v=1<<i,_=(1<<i)+1,B=i+1,y=h(),T=0;T<v;T+=1)y.add(String.fromCharCode(T));y.add(String.fromCharCode(v)),y.add(String.fromCharCode(_));var E=j(),N=t(E);N.write(v,B);var m=0,U=String.fromCharCode(n[m]);for(m+=1;m<n.length;){var H=String.fromCharCode(n[m]);m+=1,y.contains(U+H)?U=U+H:(N.write(y.indexOf(U),B),y.size()<4095&&(y.size()==1<<B&&(B+=1),y.add(U+H)),U=H)}return N.write(y.indexOf(U),B),N.write(_,B),N.flush(),E.toByteArray()},h=function(){var i={},v=0,_={};return _.add=function(B){if(_.contains(B))throw"dup key:"+B;i[B]=v,v+=1},_.size=function(){return v},_.indexOf=function(B){return i[B]},_.contains=function(B){return typeof i[B]<"u"},_};return s},er=function(x,w,g){for(var l=tr(x,w),n=0;n<w;n+=1)for(var s=0;s<x;s+=1)l.setPixel(s,n,g(s,n));var t=j();l.write(t);for(var r=z(),h=t.toByteArray(),i=0;i<h.length;i+=1)r.writeByte(h[i]);return r.flush(),"data:image/gif;base64,"+r};return P})();(function(){qrcode.stringToBytesFuncs["UTF-8"]=function(P){function D(O){for(var L=[],k=0;k<O.length;k++){var M=O.charCodeAt(k);M<128?L.push(M):M<2048?L.push(192|M>>6,128|M&63):M<55296||M>=57344?L.push(224|M>>12,128|M>>6&63,128|M&63):(k++,M=65536+((M&1023)<<10|O.charCodeAt(k)&1023),L.push(240|M>>18,128|M>>12&63,128|M>>6&63,128|M&63))}return L}return D(P)}})(),(function(P){typeof define=="function"&&define.amd?define([],P):typeof exports=="object"&&(module.exports=P())})(function(){return qrcode});
     window.generateVectorQRCode = function(text, size, margin) {
-      margin = (typeof margin === "number") ? margin : 4;
-      size = size || 136;
+      margin = (typeof margin === "number") ? margin : 2;
+      size = size || 108;
       var qr = qrcode(0, "M");
       qr.addData(text);
       qr.make();
-      var count = qr.getModuleCount();
-      var total = count + margin * 2;
-      var pathData = "";
-      for (var r = 0; r < count; r++) {
-        for (var c = 0; c < count; c++) {
-          if (qr.isDark(r, c)) {
-            pathData += "M" + (c + margin) + "," + (r + margin) + "h1v1h-1z ";
-          }
-        }
-      }
-      return "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 " + total + " " + total + "\" width=\"" + size + "\" height=\"" + size + "\" shape-rendering=\"crispEdges\"><rect width=\"100%\" height=\"100%\" fill=\"#FFFFFF\"/><path fill=\"#0F172A\" d=\"" + pathData + "\"/></svg>";
+      return qr.createSvgTag({ scalable: true, margin: margin });
     };
   </script>
 
-  <!-- Main Controller Logic -->
+  <!-- Controller Logic -->
   <script>
-    // Safe Storage helper
-    const safeStorage = {
-      getItem: function(key) {
-        try { return window.localStorage ? window.localStorage.getItem(key) : null; } catch(e) { return null; }
-      },
-      setItem: function(key, val) {
-        try { if (window.localStorage) window.localStorage.setItem(key, val); } catch(e) {}
-      },
-      removeItem: function(key) {
-        try { if (window.localStorage) window.localStorage.removeItem(key); } catch(e) {}
-      }
-    };
-
     function generateSecureRoomId() {
-      const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-      let code = '';
-      for (let i = 0; i < 8; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return 'DMP-' + code; // e.g. DMP-7K9X2M4P
+      const chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+      let code = "";
+      for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+      return "DMP-" + code;
     }
 
-    // Always generate a fresh unique cryptographic room ID on every plugin launch
-    const initialRoom = generateSecureRoomId();
-
-    // Production Credentials
     const state = {
-      roomId: initialRoom,
-      supabaseUrl: 'https://nivrnksfmkskmjdjzvzb.supabase.co',
-      supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pdnJua3NmbWtza21qZGp6dnpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxODA1NzMsImV4cCI6MjEwNTc1NjU3M30.UycIKgNMXCtoMVkrqfEbia5g2o_c6edwp1iwtIcTIO4',
-      webAppUrl: 'https://dumpy-figma-plugin.vercel.app',
+      roomId: generateSecureRoomId(),
+      supabaseUrl: "https://nivrnksfmkskmjdjzvzb.supabase.co",
+      supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pdnJua3NmbWtza21qZGp6dnpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxODA1NzMsImV4cCI6MjEwNTc1NjU3M30.UycIKgNMXCtoMVkrqfEbia5g2o_c6edwp1iwtIcTIO4",
+      webAppUrl: "https://dumpy-figma-plugin.vercel.app",
       pollIntervalId: null,
-      pollFreqMs: 1500,
       inboxItems: [],
       selectedIds: new Set(),
       sections: [],
-      selectedSectionId: '__NEW__',
       isInserting: false,
-      knownItemIds: new Set()
+      knownItemIds: new Set(),
+      syncedIps: new Set()
     };
 
     const el = {
-      qrContainer: document.getElementById('qrContainer'),
-      roomCodeDisplay: document.getElementById('roomCodeDisplay'),
-      roomCodeText: document.getElementById('roomCodeText'),
-      btnNewRoom: document.getElementById('btnNewRoom'),
-      
-      sectionSelect: document.getElementById('sectionSelect'),
-      newSectionInputRow: document.getElementById('newSectionInputRow'),
-      newSectionNameInput: document.getElementById('newSectionNameInput'),
-      btnRefreshSections: document.getElementById('btnRefreshSections'),
-      
-      statusPill: document.getElementById('statusPill'),
-      statusText: document.getElementById('statusText'),
-      itemCountPill: document.getElementById('itemCountPill'),
-      selectAllCheckbox: document.getElementById('selectAllCheckbox'),
-      btnClearInbox: document.getElementById('btnClearInbox'),
-      inboxList: document.getElementById('inboxList'),
-      emptyState: document.getElementById('emptyState'),
-      
-      btnInsertBatch: document.getElementById('btnInsertBatch'),
-      btnInsertText: document.getElementById('btnInsertText'),
-      btnManualRefresh: document.getElementById('btnManualRefresh'),
-      
-      toastMessage: document.getElementById('toastMessage'),
-      toastText: document.getElementById('toastText')
+      beaconCard: document.getElementById("beaconCard"),
+      beaconToggleHeader: document.getElementById("beaconToggleHeader"),
+      qrContainer: document.getElementById("qrContainer"),
+      roomCodeDisplay: document.getElementById("roomCodeDisplay"),
+      roomCodeText: document.getElementById("roomCodeText"),
+      btnNewRoom: document.getElementById("btnNewRoom"),
+      sectionSelect: document.getElementById("sectionSelect"),
+      newSectionNameInput: document.getElementById("newSectionNameInput"),
+      btnRefreshSections: document.getElementById("btnRefreshSections"),
+      itemCountTag: document.getElementById("itemCountTag"),
+      selectAllCb: document.getElementById("selectAllCb"),
+      btnDeleteSelected: document.getElementById("btnDeleteSelected"),
+      deleteCountText: document.getElementById("deleteCountText"),
+      inboxList: document.getElementById("inboxList"),
+      emptyState: document.getElementById("emptyState"),
+      btnInsertBatch: document.getElementById("btnInsertBatch"),
+      btnInsertText: document.getElementById("btnInsertText"),
+      btnSyncNow: document.getElementById("btnSyncNow"),
+      toastBox: document.getElementById("toastBox"),
+      toastMsg: document.getElementById("toastMsg")
     };
 
-    function showToast(msg, duration = 2400) {
-      el.toastText.textContent = msg;
-      el.toastMessage.classList.add('show');
-      setTimeout(() => el.toastMessage.classList.remove('show'), duration);
+    function showToast(msg, ms = 2200) {
+      el.toastMsg.textContent = msg;
+      el.toastBox.classList.add("show");
+      setTimeout(() => el.toastBox.classList.remove("show"), ms);
     }
 
-    function formatBytes(bytes) {
-      if (!bytes || bytes === 0) return '0 B';
-      const k = 1024;
-      const sizes = ['B', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    function formatBytes(b) {
+      if (!b) return "0 B";
+      const k = 1024, s = ["B", "KB", "MB", "GB"];
+      const i = Math.floor(Math.log(b) / Math.log(k));
+      return parseFloat((b / Math.pow(k, i)).toFixed(1)) + " " + s[i];
     }
 
-    // Render QR Code as crisp Vector SVG
+    // Auto-record visitor IP into dumpy_visitors on image receipt
+    function syncVisitorIp(ip, deviceId) {
+      if (!ip || state.syncedIps.has(ip)) return;
+      state.syncedIps.add(ip);
+      try {
+        fetch(state.supabaseUrl + "/rest/v1/dumpy_visitors?on_conflict=ip_address", {
+          method: "POST",
+          headers: {
+            "apikey": state.supabaseKey,
+            "Authorization": "Bearer " + state.supabaseKey,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+          },
+          body: JSON.stringify({
+            ip_address: ip,
+            device_id: deviceId || null,
+            last_seen: new Date().toISOString()
+          })
+        }).catch(() => {});
+      } catch (e) {}
+    }
+
     function updatePairingUI() {
       el.roomCodeText.textContent = state.roomId;
-      const pairingUrl = `${state.webAppUrl}/web/index.html?room=${encodeURIComponent(state.roomId)}`;
-
+      const url = state.webAppUrl + "/web/index.html?room=" + encodeURIComponent(state.roomId);
       try {
-        const svgMarkup = window.generateVectorQRCode(pairingUrl, 126, 3);
-        el.qrContainer.innerHTML = svgMarkup;
+        el.qrContainer.innerHTML = window.generateVectorQRCode(url, 108, 2);
       } catch (e) {
-        console.warn("Vector SVG generation fallback:", e);
-        el.qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=126x126&data=${encodeURIComponent(pairingUrl)}&color=0F172A" alt="QR" />`;
+        el.qrContainer.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=' + encodeURIComponent(url) + '&color=0F172A" alt="QR" />';
       }
     }
 
     function updateSectionSelect() {
-      const select = el.sectionSelect;
-      const currentVal = select.value;
-      
-      select.innerHTML = `
-        <option value="__NEW__">➕ Create New Section...</option>
-        <option value="__FREE__">📌 Free Canvas (No Section)</option>
-      `;
-
+      const sel = el.sectionSelect;
+      const cur = sel.value;
+      sel.innerHTML = '<option value="__NEW__">➕ Create New Section...</option><option value="__FREE__">📌 Free Canvas (No Section)</option>';
       if (state.sections && state.sections.length > 0) {
-        const optGroup = document.createElement('optgroup');
-        optGroup.label = 'Existing Figma Sections';
-        state.sections.forEach(sec => {
-          const opt = document.createElement('option');
-          opt.value = sec.id;
-          opt.textContent = `📁 ${sec.name}`;
-          optGroup.appendChild(opt);
+        const grp = document.createElement("optgroup");
+        grp.label = "Existing Sections";
+        state.sections.forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s.id;
+          opt.textContent = "📁 " + s.name;
+          grp.appendChild(opt);
         });
-        select.appendChild(optGroup);
+        sel.appendChild(grp);
       }
-
-      const hasPrevVal = Array.from(select.options).some(o => o.value === currentVal);
-      if (hasPrevVal) {
-        select.value = currentVal;
-      } else {
-        select.value = '__NEW__';
-      }
-
-      el.newSectionInputRow.classList.toggle('active', select.value === '__NEW__');
+      sel.value = Array.from(sel.options).some(o => o.value === cur) ? cur : "__NEW__";
+      el.newSectionNameInput.classList.toggle("active", sel.value === "__NEW__");
     }
 
-    // Polling live screenshots from Supabase
     async function pollInbox() {
       if (!state.supabaseUrl || !state.supabaseKey || !state.roomId) return;
-
       try {
-        const queryUrl = `${state.supabaseUrl}/rest/v1/dumpy_screenshots?room_id=eq.${encodeURIComponent(state.roomId)}&order=created_at.desc&limit=50`;
-
-        const res = await fetch(queryUrl, {
-          headers: {
-            'apikey': state.supabaseKey,
-            'Authorization': `Bearer ${state.supabaseKey}`,
-            'Range': '0-49'
-          }
-        });
-
-        if (!res.ok) {
-          el.statusPill.style.borderColor = 'var(--danger-border)';
-          el.statusPill.style.background = 'var(--danger-bg)';
-          el.statusText.textContent = 'Connection Error';
-          return;
+        const url = state.supabaseUrl + "/rest/v1/dumpy_screenshots?room_id=eq." + encodeURIComponent(state.roomId) + "&order=created_at.desc&limit=1000";
+        const res = await fetch(url, { headers: { "apikey": state.supabaseKey, "Authorization": "Bearer " + state.supabaseKey, "Range": "0-999" } });
+        if (res.ok) {
+          const items = await res.json();
+          handleItems(items || []);
         }
-
-        el.statusPill.style.borderColor = 'var(--success-border)';
-        el.statusPill.style.background = 'var(--success-bg)';
-        el.statusText.textContent = 'Live (1.5s)';
-
-        const items = await res.json();
-        handleNewInboxItems(items || []);
-
-      } catch (err) {
-        console.warn("Poll error:", err);
-      }
+      } catch (e) {}
     }
 
-    function handleNewInboxItems(items) {
+    function handleItems(items) {
       state.inboxItems = items;
-      el.itemCountPill.textContent = items.length;
+      el.itemCountTag.textContent = items.length;
+      let newCount = 0;
+      items.forEach(it => {
+        if (!state.knownItemIds.has(it.id)) {
+          state.knownItemIds.add(it.id);
+          newCount++;
+          if (!it.is_inserted) state.selectedIds.add(it.id);
 
-      let newlyDiscoveredCount = 0;
-      items.forEach(item => {
-        if (!state.knownItemIds.has(item.id)) {
-          state.knownItemIds.add(item.id);
-          newlyDiscoveredCount++;
-          if (!item.is_inserted) {
-            state.selectedIds.add(item.id);
+          // Guarantee visitor IP is logged in dumpy_visitors table
+          if (it.client_ip) {
+            syncVisitorIp(it.client_ip, it.device_id);
           }
         }
       });
-
-      if (newlyDiscoveredCount > 0) {
-        showToast(`📸 ${newlyDiscoveredCount} new screenshot(s) beamed!`);
-      }
-
-      renderInboxList();
-      updateInsertButton();
+      if (newCount > 0) showToast("📸 " + newCount + " new photo(s) received");
+      renderList();
+      updateButtons();
     }
 
-    function renderInboxList() {
+    function renderList() {
       const items = state.inboxItems;
-
       if (!items || items.length === 0) {
-        el.emptyState.style.display = 'flex';
-        el.inboxList.innerHTML = '';
+        el.emptyState.style.display = "flex";
+        el.inboxList.innerHTML = "";
         el.inboxList.appendChild(el.emptyState);
         return;
       }
+      el.emptyState.style.display = "none";
+      el.inboxList.innerHTML = "";
 
-      el.emptyState.style.display = 'none';
-      el.inboxList.innerHTML = '';
+      items.forEach(it => {
+        const row = document.createElement("div");
+        row.className = "item-card " + (state.selectedIds.has(it.id) ? "selected" : "");
+        row.id = "item-" + it.id;
+        const isChecked = state.selectedIds.has(it.id);
 
-      items.forEach(item => {
-        const row = document.createElement('div');
-        row.className = `item-row ${state.selectedIds.has(item.id) ? 'selected' : ''}`;
-        row.id = `item-${item.id}`;
-
-        const isChecked = state.selectedIds.has(item.id);
-        const timeAgo = getTimeAgo(new Date(item.created_at));
-        const sizeFormatted = formatBytes(item.file_size || 0);
-
-        row.innerHTML = `
-          <input type="checkbox" class="checkbox-custom item-checkbox" data-id="${item.id}" ${isChecked ? 'checked' : ''} />
-          <img src="${item.file_url}" class="item-thumb-box" alt="Thumbnail" loading="lazy" />
-          <div class="item-details">
-            <span class="item-name" title="${item.file_name}">${item.file_name}</span>
-            <span class="item-meta">
-              <span>${timeAgo}</span>
-              <span>•</span>
-              <span>${sizeFormatted}</span>
-            </span>
-          </div>
-          <div class="item-actions">
-            ${item.is_inserted 
-              ? `<span class="badge-inserted">✓ Placed</span>` 
-              : `<button class="btn-item-insert" data-single-id="${item.id}">Insert</button>`}
-          </div>
-        `;
-
+        row.innerHTML = 
+          '<input type="checkbox" class="custom-cb it-cb" data-id="' + it.id + '" ' + (isChecked ? 'checked' : '') + ' />' +
+          '<img src="' + it.file_url + '" class="item-thumb" alt="Thumb" loading="lazy" />' +
+          '<div class="item-info">' +
+            '<span class="item-title" title="' + it.file_name + '">' + it.file_name + '</span>' +
+            '<span class="item-sub"><span>' + formatBytes(it.file_size) + '</span></span>' +
+          '</div>' +
+          '<div class="item-btns">' +
+            (it.is_inserted ? '<span class="badge-placed">✓ Placed</span>' : '<button class="btn-insert-single" data-ins="' + it.id + '">Insert</button>') +
+            '<button class="btn-delete-single" data-del="' + it.id + '" title="Delete photo">' +
+              '<svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>' +
+            '</button>' +
+          '</div>';
         el.inboxList.appendChild(row);
       });
 
-      // Bind item checkbox events
-      el.inboxList.querySelectorAll('.item-checkbox').forEach(cb => {
-        cb.addEventListener('change', (e) => {
-          const id = e.target.getAttribute('data-id');
-          if (e.target.checked) {
-            state.selectedIds.add(id);
-          } else {
-            state.selectedIds.delete(id);
-          }
-          const parentRow = document.getElementById(`item-${id}`);
-          if (parentRow) parentRow.classList.toggle('selected', e.target.checked);
-          updateInsertButton();
+      el.inboxList.querySelectorAll(".it-cb").forEach(cb => {
+        cb.addEventListener("change", (e) => {
+          const id = e.target.getAttribute("data-id");
+          if (e.target.checked) state.selectedIds.add(id); else state.selectedIds.delete(id);
+          const parent = document.getElementById("item-" + id);
+          if (parent) parent.classList.toggle("selected", e.target.checked);
+          updateButtons();
         });
       });
 
-      // Bind single item insert buttons
-      el.inboxList.querySelectorAll('[data-single-id]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const id = btn.getAttribute('data-single-id');
-          insertSingleScreenshot(id);
-        });
+      el.inboxList.querySelectorAll("[data-ins]").forEach(b => {
+        b.addEventListener("click", (e) => { e.stopPropagation(); insertSingle(b.getAttribute("data-ins")); });
+      });
+
+      el.inboxList.querySelectorAll("[data-del]").forEach(b => {
+        b.addEventListener("click", (e) => { e.stopPropagation(); deleteSingle(b.getAttribute("data-del")); });
       });
     }
 
-    function getTimeAgo(date) {
-      const sec = Math.floor((new Date() - date) / 1000);
-      if (sec < 5) return 'just now';
-      if (sec < 60) return `${sec}s ago`;
-      const min = Math.floor(sec / 60);
-      if (min < 60) return `${min}m ago`;
-      const hr = Math.floor(min / 60);
-      return `${hr}h ago`;
-    }
-
-    function updateInsertButton() {
+    function updateButtons() {
       const count = state.selectedIds.size;
       el.btnInsertBatch.disabled = count === 0 || state.isInserting;
-      el.btnInsertText.textContent = state.isInserting 
-        ? 'Beaming to Canvas...' 
-        : `Insert Selected (${count})`;
-      
-      const unplacedItems = state.inboxItems.filter(it => !it.is_inserted);
-      el.selectAllCheckbox.checked = unplacedItems.length > 0 && unplacedItems.every(it => state.selectedIds.has(it.id));
+      el.btnInsertText.textContent = state.isInserting ? "Placing into Figma..." : "Insert Selected (" + count + ")";
+      const unplaced = state.inboxItems.filter(it => !it.is_inserted);
+      el.selectAllCb.checked = unplaced.length > 0 && unplaced.every(it => state.selectedIds.has(it.id));
+      if (count > 0) {
+        el.btnDeleteSelected.style.display = "inline-flex";
+        el.deleteCountText.textContent = count;
+      } else {
+        el.btnDeleteSelected.style.display = "none";
+      }
     }
 
-    // Downscale oversized captures (>4096px) to prevent Figma canvas texture crash
-    async function fetchAndDownscaleImageBytes(imageUrl) {
+    async function fetchImageBytes(url) {
       return new Promise((resolve, reject) => {
         const img = new Image();
-        img.crossOrigin = 'anonymous';
+        img.crossOrigin = "anonymous";
         img.onload = () => {
-          const MAX_DIM = 4096;
-          let w = img.naturalWidth || img.width;
-          let h = img.naturalHeight || img.height;
-
-          if (w > MAX_DIM || h > MAX_DIM) {
-            if (w > h) {
-              h = Math.round((h * MAX_DIM) / w);
-              w = MAX_DIM;
-            } else {
-              w = Math.round((w * MAX_DIM) / h);
-              h = MAX_DIM;
-            }
+          const MAX = 4096;
+          let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+          if (w > MAX || h > MAX) {
+            if (w > h) { h = Math.round((h * MAX) / w); w = MAX; } else { w = Math.round((w * MAX) / h); h = MAX; }
           }
-
-          const canvas = document.createElement('canvas');
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-
-          canvas.toBlob((blob) => {
-            if (!blob) {
-              reject(new Error("Failed to create blob from image"));
-              return;
-            }
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              resolve({
-                bytes: new Uint8Array(reader.result),
-                width: w,
-                height: h
-              });
-            };
-            reader.onerror = reject;
-            reader.readAsArrayBuffer(blob);
-          }, 'image/png');
+          const c = document.createElement("canvas");
+          c.width = w; c.height = h;
+          c.getContext("2d").drawImage(img, 0, 0, w, h);
+          c.toBlob(blob => {
+            const r = new FileReader();
+            r.onloadend = () => resolve({ bytes: new Uint8Array(r.result), width: w, height: h });
+            r.onerror = reject;
+            r.readAsArrayBuffer(blob);
+          }, "image/png");
         };
-        img.onerror = () => reject(new Error("Failed to load image from public URL"));
-        img.src = imageUrl;
+        img.onerror = reject;
+        img.src = url;
       });
     }
 
-    async function insertSingleScreenshot(id) {
-      const item = state.inboxItems.find(it => it.id === id);
-      if (!item) return;
-
+    async function insertSingle(id) {
+      const it = state.inboxItems.find(x => x.id === id);
+      if (!it) return;
       try {
-        showToast(`Placing "${item.file_name}"...`);
-        const { bytes, width, height } = await fetchAndDownscaleImageBytes(item.file_url);
-
-        const targetSection = el.sectionSelect.value;
-        const sectionId = (targetSection !== '__NEW__' && targetSection !== '__FREE__') ? targetSection : null;
-
+        showToast('Placing "' + it.file_name + '"...');
+        const res = await fetchImageBytes(it.file_url);
+        const sel = el.sectionSelect.value;
         parent.postMessage({
           pluginMessage: {
             type: "INSERT_SINGLE_IMAGE",
-            id: item.id,
-            name: item.file_name,
-            bytes: bytes,
-            width: width,
-            height: height,
-            sectionId: sectionId
+            id: it.id,
+            name: it.file_name,
+            bytes: res.bytes,
+            width: res.width,
+            height: res.height,
+            sectionId: (sel !== "__NEW__" && sel !== "__FREE__") ? sel : null
           }
-        }, '*');
-
-        markItemsAsInserted([item.id]);
-
+        }, "*");
+        markInserted([it.id]);
       } catch (err) {
-        console.error("Single insert error:", err);
-        showToast(`Insert failed: ${err.message}`);
+        showToast("Failed: " + err.message);
       }
     }
 
-    async function insertBatchScreenshots() {
-      const selectedList = state.inboxItems.filter(it => state.selectedIds.has(it.id));
-      if (selectedList.length === 0) return;
-
+    async function insertBatch() {
+      const selected = state.inboxItems.filter(it => state.selectedIds.has(it.id));
+      if (selected.length === 0) return;
       state.isInserting = true;
-      updateInsertButton();
-      showToast(`⚡ Placing ${selectedList.length} screenshots into Figma...`);
+      updateButtons();
+      showToast("⚡ Placing " + selected.length + " photo(s)...");
 
       try {
-        const preparedItems = [];
-        for (const item of selectedList) {
+        const prepared = [];
+        for (const it of selected) {
           try {
-            const { bytes, width, height } = await fetchAndDownscaleImageBytes(item.file_url);
-            preparedItems.push({
-              id: item.id,
-              name: item.file_name,
-              bytes: bytes,
-              width: width,
-              height: height
-            });
-          } catch (e) {
-            console.warn(`Failed to process ${item.file_name}:`, e);
-          }
+            const res = await fetchImageBytes(it.file_url);
+            prepared.push({ id: it.id, name: it.file_name, bytes: res.bytes, width: res.width, height: res.height });
+          } catch (e) {}
         }
+        if (prepared.length === 0) throw new Error("Could not process images");
 
-        if (preparedItems.length === 0) {
-          throw new Error("Could not download selected images");
-        }
-
-        const selectVal = el.sectionSelect.value;
-        let sectionId = null;
-        let newSectionName = null;
-
-        if (selectVal === '__NEW__') {
-          newSectionName = el.newSectionNameInput.value.trim() || `Screenshots (${state.roomId})`;
-        } else if (selectVal !== '__FREE__') {
-          sectionId = selectVal;
-        }
-
+        const sel = el.sectionSelect.value;
         parent.postMessage({
           pluginMessage: {
             type: "INSERT_BATCH",
-            items: preparedItems,
-            sectionId: sectionId,
-            newSectionName: newSectionName,
-            columns: Math.min(Math.max(preparedItems.length <= 2 ? preparedItems.length : 3, 1), 5)
+            items: prepared,
+            sectionId: (sel !== "__NEW__" && sel !== "__FREE__") ? sel : null,
+            newSectionName: sel === "__NEW__" ? (el.newSectionNameInput.value.trim() || "Mobile Screenshots") : null,
+            columns: Math.min(Math.max(prepared.length <= 2 ? prepared.length : 3, 1), 5)
           }
-        }, '*');
+        }, "*");
 
-        markItemsAsInserted(preparedItems.map(p => p.id));
+        markInserted(prepared.map(p => p.id));
         state.selectedIds.clear();
-
-      } catch (err) {
-        console.error("Batch insert failed:", err);
-        showToast(`Batch insert error: ${err.message}`);
+      } catch (e) {
+        showToast("Error: " + e.message);
       } finally {
         state.isInserting = false;
-        updateInsertButton();
+        updateButtons();
       }
     }
 
-    async function markItemsAsInserted(ids) {
+    async function markInserted(ids) {
       if (!ids || ids.length === 0) return;
       try {
-        const updateUrl = `${state.supabaseUrl}/rest/v1/dumpy_screenshots?id=in.(${ids.join(',')})`;
-        await fetch(updateUrl, {
-          method: 'PATCH',
-          headers: {
-            'apikey': state.supabaseKey,
-            'Authorization': `Bearer ${state.supabaseKey}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
+        fetch(state.supabaseUrl + "/rest/v1/dumpy_screenshots?id=in.(" + ids.join(",") + ")", {
+          method: "PATCH",
+          headers: { "apikey": state.supabaseKey, "Authorization": "Bearer " + state.supabaseKey, "Content-Type": "application/json" },
           body: JSON.stringify({ is_inserted: true })
         });
-      } catch (e) {
-        console.warn("Status sync error:", e);
-      }
+      } catch (e) {}
     }
 
-    function clearInsertedFromInbox() {
-      const inserted = state.inboxItems.filter(it => it.is_inserted);
-      if (inserted.length === 0) {
-        showToast("No placed screenshots to clear");
-        return;
-      }
-      state.inboxItems = state.inboxItems.filter(it => !it.is_inserted);
-      renderInboxList();
-      updateInsertButton();
-      showToast(`Cleared ${inserted.length} placed items`);
-    }
+    async function deleteSingle(id) {
+      const it = state.inboxItems.find(x => x.id === id);
+      if (!it) return;
+      state.inboxItems = state.inboxItems.filter(x => x.id !== id);
+      state.selectedIds.delete(id);
+      el.itemCountTag.textContent = state.inboxItems.length;
+      renderList();
+      updateButtons();
+      showToast('🗑️ Deleted "' + it.file_name + '"');
 
-    // Event Listeners
-    el.roomCodeDisplay.addEventListener('click', () => {
-      const pairingUrl = `${state.webAppUrl}/web/index.html?room=${encodeURIComponent(state.roomId)}`;
-      navigator.clipboard.writeText(state.roomId).then(() => {
-        showToast(`📋 Copied Room ${state.roomId}!`);
-      }).catch(() => {
-        showToast(`Room: ${state.roomId}`);
+      fetch(state.supabaseUrl + "/rest/v1/dumpy_screenshots?id=eq." + encodeURIComponent(id), {
+        method: "DELETE",
+        headers: { "apikey": state.supabaseKey, "Authorization": "Bearer " + state.supabaseKey }
       });
+
+      if (it.storage_path) {
+        fetch(state.supabaseUrl + "/storage/v1/object/dumpy-screenshots", {
+          method: "DELETE",
+          headers: { "apikey": state.supabaseKey, "Authorization": "Bearer " + state.supabaseKey, "Content-Type": "application/json" },
+          body: JSON.stringify({ prefixes: [it.storage_path] })
+        });
+      }
+    }
+
+    async function deleteSelected() {
+      const selected = state.inboxItems.filter(it => state.selectedIds.has(it.id));
+      if (selected.length === 0) return;
+      const ids = selected.map(s => s.id);
+      const paths = selected.map(s => s.storage_path).filter(Boolean);
+
+      state.inboxItems = state.inboxItems.filter(it => !state.selectedIds.has(it.id));
+      state.selectedIds.clear();
+      el.itemCountTag.textContent = state.inboxItems.length;
+      renderList();
+      updateButtons();
+      showToast("🗑️ Deleted " + selected.length + " photo(s)");
+
+      fetch(state.supabaseUrl + "/rest/v1/dumpy_screenshots?id=in.(" + ids.join(",") + ")", {
+        method: "DELETE",
+        headers: { "apikey": state.supabaseKey, "Authorization": "Bearer " + state.supabaseKey }
+      });
+
+      if (paths.length > 0) {
+        fetch(state.supabaseUrl + "/storage/v1/object/dumpy-screenshots", {
+          method: "DELETE",
+          headers: { "apikey": state.supabaseKey, "Authorization": "Bearer " + state.supabaseKey, "Content-Type": "application/json" },
+          body: JSON.stringify({ prefixes: paths })
+        });
+      }
+    }
+
+    function cleanupRoom(isUnload = false) {
+      if (!state.supabaseUrl || !state.supabaseKey || !state.roomId) return;
+      const url = state.supabaseUrl + "/rest/v1/dumpy_screenshots?room_id=eq." + encodeURIComponent(state.roomId);
+      if (isUnload) {
+        try {
+          fetch(url, { method: "DELETE", headers: { "apikey": state.supabaseKey, "Authorization": "Bearer " + state.supabaseKey }, keepalive: true });
+        } catch(e) {}
+      } else {
+        fetch(url, { method: "DELETE", headers: { "apikey": state.supabaseKey, "Authorization": "Bearer " + state.supabaseKey } });
+      }
+    }
+
+    window.addEventListener("beforeunload", () => cleanupRoom(true));
+    window.addEventListener("pagehide", () => cleanupRoom(true));
+
+    // Accordion Toggle
+    el.beaconToggleHeader.addEventListener("click", () => {
+      el.beaconCard.classList.toggle("collapsed");
     });
 
-    el.btnNewRoom.addEventListener('click', () => {
+    // Listeners
+    el.roomCodeDisplay.addEventListener("click", () => {
+      navigator.clipboard.writeText(state.roomId).then(() => showToast("📋 Copied " + state.roomId));
+    });
+
+    el.btnNewRoom.addEventListener("click", () => {
+      cleanupRoom(false);
       state.roomId = generateSecureRoomId();
-      safeStorage.setItem('dumpy_room_id', state.roomId);
       state.knownItemIds.clear();
       state.selectedIds.clear();
       state.inboxItems = [];
       updatePairingUI();
-      renderInboxList();
-      updateInsertButton();
-      showToast(`✨ Generated Room ${state.roomId}`);
-      
-      parent.postMessage({
-        pluginMessage: { type: "SAVE_STORAGE", key: "dumpy_room_id", value: state.roomId }
-      }, '*');
-
+      renderList();
+      updateButtons();
+      showToast("✨ Generated Room " + state.roomId);
       pollInbox();
     });
 
-    el.sectionSelect.addEventListener('change', () => {
-      const val = el.sectionSelect.value;
-      el.newSectionInputRow.classList.toggle('active', val === '__NEW__');
-      if (val !== '__NEW__' && val !== '__FREE__') {
-        parent.postMessage({
-          pluginMessage: { type: "SAVE_STORAGE", key: "dumpy_preferred_section_id", value: val }
-        }, '*');
-      }
+    el.sectionSelect.addEventListener("change", () => {
+      el.newSectionNameInput.classList.toggle("active", el.sectionSelect.value === "__NEW__");
     });
 
-    el.btnRefreshSections.addEventListener('click', () => {
-      parent.postMessage({ pluginMessage: { type: "GET_SECTIONS" } }, '*');
+    el.btnRefreshSections.addEventListener("click", () => {
+      parent.postMessage({ pluginMessage: { type: "GET_SECTIONS" } }, "*");
       showToast("Refreshed sections");
     });
 
-    el.selectAllCheckbox.addEventListener('change', (e) => {
-      if (e.target.checked) {
-        state.inboxItems.filter(it => !it.is_inserted).forEach(it => state.selectedIds.add(it.id));
-      } else {
-        state.selectedIds.clear();
-      }
-      renderInboxList();
-      updateInsertButton();
+    el.selectAllCb.addEventListener("change", (e) => {
+      if (e.target.checked) state.inboxItems.filter(it => !it.is_inserted).forEach(it => state.selectedIds.add(it.id));
+      else state.selectedIds.clear();
+      renderList();
+      updateButtons();
     });
 
-    el.btnClearInbox.addEventListener('click', clearInsertedFromInbox);
-    el.btnInsertBatch.addEventListener('click', insertBatchScreenshots);
-    el.btnManualRefresh.addEventListener('click', () => {
-      pollInbox();
-      showToast("Inbox synchronized");
-    });
+    el.btnDeleteSelected.addEventListener("click", deleteSelected);
+    el.btnInsertBatch.addEventListener("click", insertBatch);
+    el.btnSyncNow.addEventListener("click", () => { pollInbox(); showToast("Inbox synchronized"); });
 
-    // Handle messages from Figma Sandbox (code.js)
-    window.onmessage = (event) => {
-      const msg = event.data ? event.data.pluginMessage : null;
+    // Messages from Figma sandbox
+    window.onmessage = (e) => {
+      const msg = e.data ? e.data.pluginMessage : null;
       if (!msg) return;
-
-      switch (msg.type) {
-        case "INIT_RESPONSE":
-          state.sections = msg.sections || [];
-
-          if (msg.savedSectionId) {
-            state.selectedSectionId = msg.savedSectionId;
-          }
-
-          updatePairingUI();
-          updateSectionSelect();
-          startPolling();
-          break;
-
-        case "SECTIONS_LIST":
-          state.sections = msg.sections || [];
-          updateSectionSelect();
-          break;
-
-        case "SECTION_CREATED":
-          state.sections = msg.sections || [];
-          state.selectedSectionId = msg.sectionId;
-          updateSectionSelect();
-          el.sectionSelect.value = msg.sectionId;
-          el.newSectionInputRow.classList.remove('active');
-          break;
-
-        case "IMAGE_INSERTED":
-          markItemsAsInserted([msg.id]);
-          break;
-
-        case "BATCH_INSERTED":
-          if (msg.insertedIds) {
-            markItemsAsInserted(msg.insertedIds);
-          }
-          break;
+      if (msg.type === "INIT_RESPONSE" || msg.type === "SECTIONS_LIST") {
+        state.sections = msg.sections || [];
+        updateSectionSelect();
       }
     };
 
-    function startPolling() {
-      if (state.pollIntervalId) clearInterval(state.pollIntervalId);
-      pollInbox();
-      state.pollIntervalId = setInterval(pollInbox, state.pollFreqMs);
-    }
-
     // Boot
-    try {
-      updatePairingUI();
-      updateSectionSelect();
-      startPolling();
-      parent.postMessage({ pluginMessage: { type: "INIT" } }, '*');
-    } catch (e) {
-      console.error("Boot error:", e);
-    }
+    updatePairingUI();
+    updateSectionSelect();
+    pollInbox();
+    state.pollIntervalId = setInterval(pollInbox, 1500);
+    parent.postMessage({ pluginMessage: { type: "INIT" } }, "*");
   </script>
 </body>
 </html>
