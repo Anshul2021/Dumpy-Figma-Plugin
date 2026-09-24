@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- DUMPY: Zero-Auth, High-Speed Room-Based Screenshot Beam System
--- Pure Cryptographic Room Isolation + Visitor IP Logging & Anonymous Tracking
+-- Pure Cryptographic Room Isolation + Visitor Tracking (Unique per Device/User)
 -- ==============================================================================
 -- Run this SQL in your Supabase project's SQL Editor (Dashboard > SQL Editor > New Query)
 
@@ -9,27 +9,93 @@ DROP TRIGGER IF EXISTS on_auth_user_created_dumpy ON auth.users;
 DROP FUNCTION IF EXISTS public.handle_new_dumpy_user();
 DROP TABLE IF EXISTS public.dumpy_users CASCADE;
 
--- 2. Create Visitors Tracking Table (IP Address logging)
+-- 2. Create Visitors Tracking Table (Deduplicated per Device with IP logging)
 CREATE TABLE IF NOT EXISTS public.dumpy_visitors (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    ip_address TEXT NOT NULL,                                          -- Client IP address
-    device_id TEXT DEFAULT NULL,                                       -- Anonymous device UUID
+    device_id TEXT NOT NULL,                                           -- Anonymous persistent device UUID
+    ip_address TEXT DEFAULT 'unknown',                                 -- Latest Client IP address
     user_agent TEXT DEFAULT NULL,                                      -- Browser/device user agent
     first_seen TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_seen TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
-    visit_count INTEGER DEFAULT 1,
-    CONSTRAINT uq_dumpy_visitors_ip UNIQUE (ip_address)
+    visit_count INTEGER DEFAULT 1
 );
 
--- Ensure all visitor columns exist
-ALTER TABLE public.dumpy_visitors ADD COLUMN IF NOT EXISTS ip_address TEXT DEFAULT '';
+-- Ensure all visitor columns exist & clean up old constraints
+ALTER TABLE public.dumpy_visitors DROP CONSTRAINT IF EXISTS uq_dumpy_visitors_ip;
 ALTER TABLE public.dumpy_visitors ADD COLUMN IF NOT EXISTS device_id TEXT DEFAULT NULL;
+ALTER TABLE public.dumpy_visitors ADD COLUMN IF NOT EXISTS ip_address TEXT DEFAULT 'unknown';
 ALTER TABLE public.dumpy_visitors ADD COLUMN IF NOT EXISTS user_agent TEXT DEFAULT NULL;
 ALTER TABLE public.dumpy_visitors ADD COLUMN IF NOT EXISTS first_seen TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
 ALTER TABLE public.dumpy_visitors ADD COLUMN IF NOT EXISTS last_seen TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
 ALTER TABLE public.dumpy_visitors ADD COLUMN IF NOT EXISTS visit_count INTEGER DEFAULT 1;
 
--- 3. Create the pure Room-based Screenshots table with Foreign Key to dumpy_visitors
+-- Add Unique Constraint on device_id (after deduplicating any legacy rows)
+DO $$
+BEGIN
+    -- Remove any legacy duplicates by device_id keeping the newest row
+    DELETE FROM public.dumpy_visitors a
+    USING public.dumpy_visitors b
+    WHERE a.device_id IS NOT NULL 
+      AND a.device_id = b.device_id 
+      AND a.last_seen < b.last_seen;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'uq_dumpy_visitors_device'
+    ) THEN
+        ALTER TABLE public.dumpy_visitors ADD CONSTRAINT uq_dumpy_visitors_device UNIQUE (device_id);
+    END IF;
+END $$;
+
+-- 3. Stored Procedure for Safe, Atomic Visitor Upsert & Deduplication
+CREATE OR REPLACE FUNCTION public.record_dumpy_visitor(
+    p_device_id TEXT,
+    p_ip TEXT DEFAULT NULL,
+    p_user_agent TEXT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+    v_visitor RECORD;
+BEGIN
+    -- 1. Look up existing visitor by persistent device_id
+    SELECT * INTO v_visitor
+    FROM public.dumpy_visitors
+    WHERE device_id = p_device_id
+    ORDER BY last_seen DESC
+    LIMIT 1;
+
+    IF FOUND THEN
+        -- Update existing visitor (touch last_seen, increment visit_count, record latest IP)
+        UPDATE public.dumpy_visitors
+        SET last_seen = timezone('utc'::text, now()),
+            visit_count = COALESCE(public.dumpy_visitors.visit_count, 1) + 1,
+            ip_address = COALESCE(p_ip, public.dumpy_visitors.ip_address),
+            user_agent = COALESCE(p_user_agent, public.dumpy_visitors.user_agent)
+        WHERE id = v_visitor.id
+        RETURNING * INTO v_visitor;
+    ELSE
+        -- Insert new visitor row
+        INSERT INTO public.dumpy_visitors (device_id, ip_address, user_agent, first_seen, last_seen, visit_count)
+        VALUES (
+            p_device_id,
+            COALESCE(p_ip, 'unknown'),
+            p_user_agent,
+            timezone('utc'::text, now()),
+            timezone('utc'::text, now()),
+            1
+        )
+        ON CONFLICT (device_id) DO UPDATE
+        SET last_seen = timezone('utc'::text, now()),
+            visit_count = COALESCE(public.dumpy_visitors.visit_count, 1) + 1,
+            ip_address = COALESCE(EXCLUDED.ip_address, public.dumpy_visitors.ip_address),
+            user_agent = COALESCE(EXCLUDED.user_agent, public.dumpy_visitors.user_agent)
+        RETURNING * INTO v_visitor;
+    END IF;
+
+    RETURN to_jsonb(v_visitor);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 4. Create the pure Room-based Screenshots table with Foreign Key to dumpy_visitors
 CREATE TABLE IF NOT EXISTS public.dumpy_screenshots (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     room_id TEXT NOT NULL,                                             -- Cryptographic Room Code (e.g. DMP-7K9X2M4P)
@@ -60,12 +126,12 @@ ALTER TABLE public.dumpy_screenshots ADD COLUMN IF NOT EXISTS created_at TIMESTA
 -- Reload PostgREST schema cache
 NOTIFY pgrst, 'reload schema';
 
--- 4. High-Performance Indexes for Sub-50ms Live Inbox Polling
-CREATE INDEX IF NOT EXISTS idx_dumpy_visitors_ip 
-ON public.dumpy_visitors (ip_address);
-
+-- 5. High-Performance Indexes for Sub-50ms Queries
 CREATE INDEX IF NOT EXISTS idx_dumpy_visitors_device 
 ON public.dumpy_visitors (device_id);
+
+CREATE INDEX IF NOT EXISTS idx_dumpy_visitors_ip 
+ON public.dumpy_visitors (ip_address);
 
 CREATE INDEX IF NOT EXISTS idx_dumpy_screenshots_room_created 
 ON public.dumpy_screenshots (room_id, created_at DESC);
@@ -79,11 +145,11 @@ ON public.dumpy_screenshots (visitor_id);
 CREATE INDEX IF NOT EXISTS idx_dumpy_screenshots_created_cleanup 
 ON public.dumpy_screenshots (created_at);
 
--- 5. Enable Row Level Security (RLS)
+-- 6. Enable Row Level Security (RLS)
 ALTER TABLE public.dumpy_visitors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.dumpy_screenshots ENABLE ROW LEVEL SECURITY;
 
--- 6. RLS Policies for Visitors Table
+-- 7. RLS Policies for Visitors Table
 DROP POLICY IF EXISTS "Allow public read on dumpy_visitors" ON public.dumpy_visitors;
 CREATE POLICY "Allow public read on dumpy_visitors" 
 ON public.dumpy_visitors FOR SELECT 
@@ -99,7 +165,12 @@ CREATE POLICY "Allow public update on dumpy_visitors"
 ON public.dumpy_visitors FOR UPDATE 
 USING (true);
 
--- 7. RLS Policies for Screenshots Table (Protected by Cryptographic Room ID)
+DROP POLICY IF EXISTS "Allow public delete on dumpy_visitors" ON public.dumpy_visitors;
+CREATE POLICY "Allow public delete on dumpy_visitors" 
+ON public.dumpy_visitors FOR DELETE 
+USING (true);
+
+-- 8. RLS Policies for Screenshots Table (Protected by Cryptographic Room ID)
 DROP POLICY IF EXISTS "Allow public read on dumpy_screenshots" ON public.dumpy_screenshots;
 CREATE POLICY "Allow public read on dumpy_screenshots" 
 ON public.dumpy_screenshots FOR SELECT 
@@ -120,7 +191,7 @@ CREATE POLICY "Allow public delete on dumpy_screenshots"
 ON public.dumpy_screenshots FOR DELETE 
 USING (true);
 
--- 8. Automatic 24-Hour Screenshot Cleanup Function
+-- 9. Automatic 24-Hour Screenshot Cleanup Function
 CREATE OR REPLACE FUNCTION public.cleanup_old_screenshots()
 RETURNS INTEGER AS $$
 DECLARE
@@ -137,7 +208,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 9. Storage Bucket 'dumpy-screenshots' Configuration
+-- 10. Storage Bucket 'dumpy-screenshots' Configuration
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
     'dumpy-screenshots',
@@ -151,7 +222,7 @@ ON CONFLICT (id) DO UPDATE SET
     file_size_limit = 52428800,
     allowed_mime_types = NULL;
 
--- 10. Storage Bucket RLS Policies - Full Anonymous Public Access
+-- 11. Storage Bucket RLS Policies - Full Anonymous Public Access
 DROP POLICY IF EXISTS "Allow public upload to dumpy-screenshots bucket" ON storage.objects;
 CREATE POLICY "Allow public upload to dumpy-screenshots bucket"
 ON storage.objects FOR INSERT 
@@ -176,7 +247,8 @@ USING (bucket_id = 'dumpy-screenshots');
 -- SETUP COMPLETE ✓
 -- ==============================================================================
 -- Your Dumpy screenshot beam system is now equipped with:
--- ✓ dumpy_visitors table for IP address & visitor tracking
+-- ✓ dumpy_visitors table with UNIQUE constraint on device_id (no duplicates!)
+-- ✓ Atomic record_dumpy_visitor RPC function for seamless upserting
 -- ✓ Foreign key visitor_id linking screenshots to visitors
 -- ✓ Zero-auth, pure Room-based cryptographic isolation
 -- ✓ High-performance indexed queries (<50ms)

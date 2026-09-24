@@ -1,6 +1,6 @@
 // ==============================================================================
 // DUMPY Mobile Web Uploader — Controller with Fast Multi-Upload & Visitor Tracking
-// Pure Cryptographic Room Architecture with IP Visitor & Device Logging
+// Pure Cryptographic Room Architecture with Deduplicated Device & IP Logging
 // ==============================================================================
 
 (function(global) {
@@ -19,7 +19,7 @@
     }
   };
 
-  // Generate or retrieve anonymous device ID
+  // Generate or retrieve anonymous persistent device ID
   function getDeviceId() {
     let deviceId = safeStorage.getItem('dumpy_device_id');
     if (!deviceId) {
@@ -38,7 +38,7 @@
     roomId: '',
     deviceId: getDeviceId(),
     clientIp: null,
-    visitorId: null,
+    visitorId: safeStorage.getItem('dumpy_visitor_id') || null,
     visitorPromise: null,
     config: window.getSupabaseConfig ? window.getSupabaseConfig() : {},
     uploadQueue: []
@@ -89,7 +89,7 @@
 
   // Fast Multi-Source Client IP Resolver (Parallel Race under 150ms)
   async function resolveClientIp() {
-    if (state.clientIp) return state.clientIp;
+    if (state.clientIp && !state.clientIp.startsWith('client-')) return state.clientIp;
 
     const resolvers = [
       fetch('https://icanhazip.com', { signal: AbortSignal.timeout(3000) }).then(r => r.text()).then(t => t.trim()),
@@ -111,40 +111,80 @@
     return state.clientIp;
   }
 
-  // Record Visitor into Supabase `dumpy_visitors`
+  // Bulletproof Visitor Record & Deduplication
+  // Ensures 1 row per device regardless of how many QR codes or rooms are scanned
   async function recordVisitor() {
     try {
       const ip = await resolveClientIp();
       const config = window.getSupabaseConfig();
       if (!config.url || !config.key) return null;
 
+      // 1. Try to find existing visitor record by persistent device_id or saved visitor_id
+      const queryParam = state.visitorId 
+        ? `id=eq.${state.visitorId}` 
+        : `device_id=eq.${encodeURIComponent(state.deviceId)}`;
+
+      const checkRes = await fetch(`${config.url}/rest/v1/dumpy_visitors?${queryParam}&order=last_seen.desc&limit=1`, {
+        headers: { 'apikey': config.key, 'Authorization': `Bearer ${config.key}` }
+      });
+
+      if (checkRes.ok) {
+        const rows = await checkRes.json();
+        if (rows && rows.length > 0) {
+          const v = rows[0];
+          state.visitorId = v.id;
+          safeStorage.setItem('dumpy_visitor_id', v.id);
+
+          // Update existing visitor timestamp & IP (No duplicates created!)
+          fetch(`${config.url}/rest/v1/dumpy_visitors?id=eq.${v.id}`, {
+            method: 'PATCH',
+            headers: {
+              'apikey': config.key,
+              'Authorization': `Bearer ${config.key}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              last_seen: new Date().toISOString(),
+              visit_count: (v.visit_count || 1) + 1,
+              ip_address: (ip && !ip.startsWith('client-')) ? ip : v.ip_address,
+              user_agent: navigator.userAgent || v.user_agent
+            })
+          }).catch(() => {});
+
+          return state.visitorId;
+        }
+      }
+
+      // 2. If no record exists for this device yet, create initial visitor record
       const visitorPayload = {
-        ip_address: ip,
         device_id: state.deviceId,
+        ip_address: ip || 'unknown',
         user_agent: navigator.userAgent || 'Mobile Web',
-        last_seen: new Date().toISOString()
+        last_seen: new Date().toISOString(),
+        visit_count: 1
       };
 
-      const res = await fetch(`${config.url}/rest/v1/dumpy_visitors?on_conflict=ip_address`, {
+      const createRes = await fetch(`${config.url}/rest/v1/dumpy_visitors`, {
         method: 'POST',
         headers: {
           'apikey': config.key,
           'Authorization': `Bearer ${config.key}`,
           'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates,return=representation'
+          'Prefer': 'return=representation'
         },
         body: JSON.stringify(visitorPayload)
       });
 
-      if (res.ok) {
-        const rows = await res.json();
-        if (rows && rows[0] && rows[0].id) {
-          state.visitorId = rows[0].id;
+      if (createRes.ok) {
+        const newRows = await createRes.json();
+        if (newRows && newRows[0] && newRows[0].id) {
+          state.visitorId = newRows[0].id;
+          safeStorage.setItem('dumpy_visitor_id', state.visitorId);
           return state.visitorId;
         }
       }
     } catch (e) {
-      console.warn('Visitor tracking error:', e);
+      console.warn('Visitor deduplication tracking:', e);
     }
     return null;
   }
@@ -267,7 +307,7 @@
       };
 
       if (state.deviceId) recordPayload.device_id = state.deviceId;
-      if (state.clientIp) recordPayload.client_ip = state.clientIp;
+      if (state.clientIp && !state.clientIp.startsWith('client-')) recordPayload.client_ip = state.clientIp;
       if (state.visitorId) recordPayload.visitor_id = state.visitorId;
 
       let dbResponse = await fetch(insertUrl, {
