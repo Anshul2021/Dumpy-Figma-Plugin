@@ -1,14 +1,10 @@
 {
-  "cleanUrls": true,
+  "cleanUrls": false,
   "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/",
+      "source": "/web",
       "destination": "/web/index.html"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/web/$1"
     }
   ]
 }

@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/web/style.css">
 </head>
 <body>
 
@@ -57,8 +57,8 @@
       </div>
     </header>
 
-    <!-- Room Status Card -->
-    <div class="room-banner">
+    <!-- Room Status Card & QR Code -->
+    <div class="room-banner" id="roomBanner">
       <div class="room-details">
         <span class="room-caption">
           <span class="live-badge">
@@ -66,13 +66,42 @@
             Paired Room
           </span>
         </span>
-        <span class="room-code-value" id="roomCodeDisplay">DMP-.....</span>
+        <span class="room-code-value" id="roomCodeDisplay" title="Click to copy Room Code">DMP-.....</span>
       </div>
-      <button class="btn-change-room" id="btnChangeRoom">Switch Room</button>
+      <div class="room-banner-actions">
+        <button class="btn-qr-toggle" id="btnToggleQR" title="Show/Hide QR Code">
+          <svg class="icon" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          <span>QR Code</span>
+        </button>
+        <button class="btn-change-room" id="btnChangeRoom">Switch Room</button>
+      </div>
+    </div>
+
+    <!-- Collapsible QR Code Card for pairing phones -->
+    <div class="qr-pairing-card" id="webQRCard" style="display: none;">
+      <div class="qr-canvas-wrapper" id="webQrContainer">
+        <canvas id="webQrCanvas" width="160" height="160"></canvas>
+      </div>
+      <div class="qr-pairing-meta">
+        <div class="qr-pairing-title">Scan to Pair Mobile</div>
+        <p class="qr-pairing-desc">Point your phone camera here to upload screenshots directly to this room.</p>
+        <button class="btn-secondary-sm" id="btnCopyWebLink">
+          <svg class="icon" viewBox="0 0 24 24">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+          Copy Pairing Link
+        </button>
+      </div>
     </div>
 
     <!-- Main Dropzone / Tap Area -->
-    <div class="upload-card" id="uploadCard">
+    <div class="upload-card" id="uploadCard" role="button" tabindex="0">
       <input type="file" id="fileInput" class="hidden-input" accept="image/*" multiple />
       <div class="upload-icon-halo">
         <svg class="icon" style="width: 32px; height: 32px;" viewBox="0 0 24 24">
@@ -85,7 +114,7 @@
         <div class="upload-title">Drop or Select Screenshots</div>
         <div class="upload-subtitle">Beam multiple photos straight to Figma</div>
       </div>
-      <button class="btn-shutter" type="button">
+      <button class="btn-shutter" id="btnUploadShutter" type="button">
         <svg class="icon" viewBox="0 0 24 24">
           <path d="M12 5v14M5 12h14"/>
         </svg>
@@ -96,7 +125,7 @@
     <!-- Quick Camera & Photo Roll Buttons -->
     <div class="quick-options">
       <input type="file" id="cameraInput" class="hidden-input" accept="image/*" capture="environment" />
-      <button class="quick-btn" id="btnCamera">
+      <button class="quick-btn" id="btnCamera" type="button">
         <div class="quick-btn-icon">
           <svg class="icon" viewBox="0 0 24 24">
             <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
@@ -106,7 +135,7 @@
         Take Photo
       </button>
 
-      <button class="quick-btn" id="btnGallery">
+      <button class="quick-btn" id="btnGallery" type="button">
         <div class="quick-btn-icon">
           <svg class="icon" viewBox="0 0 24 24">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -188,7 +217,7 @@
     <span id="toastText">Uploaded successfully</span>
   </div>
 
-  <script src="config.js"></script>
-  <script src="app.js"></script>
+  <script src="/web/config.js"></script>
+  <script src="/web/app.js"></script>
 </body>
 </html>
