@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#F8FAFC">
   <title>Dumpy — Real-Time Mobile Screenshot Inbox</title>
   
-  <!-- DM Sans Typography exclusively -->
+  <!-- DM Sans Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
@@ -17,37 +17,24 @@
 </head>
 <body>
 
+  <div class="app-background-glow"></div>
+
   <div class="app-wrapper">
-    <!-- Header -->
+    <!-- Top App Header -->
     <header class="app-header">
       <div class="brand-wrap">
         <div class="brand-icon">
-          <svg class="icon" style="width: 20px; height: 20px;" viewBox="0 0 24 24">
+          <svg class="icon" viewBox="0 0 24 24">
             <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
         </div>
-        <span class="brand-title">Dumpy</span>
+        <div class="brand-text-group">
+          <span class="brand-title">Dumpy</span>
+          <span class="brand-badge">Mobile Uploader</span>
+        </div>
       </div>
 
       <div class="header-controls">
-        <!-- Auth Profile Pill or Sign-in button -->
-        <div id="authContainer">
-          <button class="btn-google-auth" id="btnGoogleAuth" title="Sign in with Google">
-            <svg class="google-icon" viewBox="0 0 24 24" width="16" height="16">
-              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
-              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-            </svg>
-            <span>Sign in</span>
-          </button>
-          <div class="user-profile-pill" id="userProfilePill" style="display: none;">
-            <img src="" class="user-avatar" id="userAvatar" alt="User" />
-            <span class="user-name" id="userName">User</span>
-            <button class="btn-signout" id="btnSignOut" title="Sign Out">✕</button>
-          </div>
-        </div>
-
         <button class="btn-icon" id="btnSettings" title="Supabase Credentials" aria-label="Settings">
           <svg class="icon" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="3"/>
@@ -57,100 +44,115 @@
       </div>
     </header>
 
-    <!-- Room Status Card & QR Code -->
+    <!-- Room Status Card -->
     <div class="room-banner" id="roomBanner">
       <div class="room-details">
-        <span class="room-caption">
-          <span class="live-badge">
-            <span class="live-dot"></span>
-            Paired Room
-          </span>
-        </span>
-        <span class="room-code-value" id="roomCodeDisplay" title="Click to copy Room Code">DMP-.....</span>
+        <div class="room-caption">
+          <span class="live-dot"></span>
+          <span>Connected Room</span>
+        </div>
+        <div class="room-code-badge" id="roomCodeDisplay" title="Tap to copy Room Code">
+          <span class="room-code-text">DMP-.....</span>
+          <svg class="icon copy-icon" viewBox="0 0 24 24">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+        </div>
       </div>
       <div class="room-banner-actions">
-        <button class="btn-qr-toggle" id="btnToggleQR" title="Show/Hide QR Code">
+        <button class="btn-subtle-action" id="btnToggleQR" title="Show/Hide QR Code">
           <svg class="icon" viewBox="0 0 24 24">
             <rect x="3" y="3" width="7" height="7"/>
             <rect x="14" y="3" width="7" height="7"/>
             <rect x="14" y="14" width="7" height="7"/>
             <rect x="3" y="14" width="7" height="7"/>
           </svg>
-          <span>QR Code</span>
+          <span>QR</span>
         </button>
-        <button class="btn-change-room" id="btnChangeRoom">Switch Room</button>
+        <button class="btn-subtle-action" id="btnChangeRoom" title="Switch Room Code">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M23 4v6h-6M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+          </svg>
+          <span>Switch</span>
+        </button>
       </div>
     </div>
 
-    <!-- Collapsible QR Code Card for pairing phones -->
+    <!-- Collapsible QR Code Card for pairing second phone -->
     <div class="qr-pairing-card" id="webQRCard" style="display: none;">
-      <div class="qr-canvas-wrapper" id="webQrContainer">
-        <canvas id="webQrCanvas" width="160" height="160"></canvas>
-      </div>
+      <div class="qr-canvas-wrapper" id="webQrContainer"></div>
       <div class="qr-pairing-meta">
-        <div class="qr-pairing-title">Scan to Pair Mobile</div>
-        <p class="qr-pairing-desc">Point your phone camera here to upload screenshots directly to this room.</p>
-        <button class="btn-secondary-sm" id="btnCopyWebLink">
+        <div class="qr-pairing-title">Pair Another Device</div>
+        <p class="qr-pairing-desc">Scan with another phone camera to upload screenshots to this same Figma canvas.</p>
+        <button class="btn-copy-link" id="btnCopyWebLink">
           <svg class="icon" viewBox="0 0 24 24">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
             <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
           </svg>
-          Copy Pairing Link
+          <span>Copy Pairing Link</span>
         </button>
       </div>
     </div>
 
-    <!-- Main Dropzone / Tap Area -->
-    <div class="upload-card" id="uploadCard" role="button" tabindex="0">
+    <!-- Hero Interactive Dropzone & Status Card -->
+    <div class="upload-card" id="uploadCard" role="button" tabindex="0" title="Tap to select photos or drop files here">
       <input type="file" id="fileInput" class="hidden-input" accept="image/*" multiple />
+      <div class="upload-pulse-ring"></div>
       <div class="upload-icon-halo">
-        <svg class="icon" style="width: 32px; height: 32px;" viewBox="0 0 24 24">
+        <svg class="icon upload-arrow-icon" viewBox="0 0 24 24">
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
           <polyline points="17 8 12 3 7 8"/>
           <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
       </div>
       <div class="upload-instructions">
-        <div class="upload-title">Drop or Select Screenshots</div>
-        <div class="upload-subtitle">Beam multiple photos straight to Figma</div>
+        <div class="upload-title">Beam Screenshots to Figma</div>
+        <div class="upload-subtitle">Tap Camera or Gallery below to upload instantly</div>
       </div>
-      <button class="btn-shutter" id="btnUploadShutter" type="button">
-        <svg class="icon" viewBox="0 0 24 24">
-          <path d="M12 5v14M5 12h14"/>
-        </svg>
-        Upload Photos
-      </button>
     </div>
 
-    <!-- Quick Camera & Photo Roll Buttons -->
-    <div class="quick-options">
+    <!-- Primary Quick Actions: Camera & Gallery Cards -->
+    <div class="action-grid">
       <input type="file" id="cameraInput" class="hidden-input" accept="image/*" capture="environment" />
-      <button class="quick-btn" id="btnCamera" type="button">
-        <div class="quick-btn-icon">
+      
+      <!-- Take Photo Action Card -->
+      <button class="action-card action-card-camera" id="btnCamera" type="button">
+        <div class="action-card-glow"></div>
+        <div class="action-card-icon-wrap">
           <svg class="icon" viewBox="0 0 24 24">
             <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
             <circle cx="12" cy="13" r="4"/>
           </svg>
         </div>
-        Take Photo
+        <div class="action-card-text">
+          <span class="action-card-title">Take Photo</span>
+          <span class="action-card-sub">Instant camera snap</span>
+        </div>
       </button>
 
-      <button class="quick-btn" id="btnGallery" type="button">
-        <div class="quick-btn-icon">
+      <!-- Photo Library Action Card -->
+      <button class="action-card action-card-gallery" id="btnGallery" type="button">
+        <div class="action-card-glow"></div>
+        <div class="action-card-icon-wrap">
           <svg class="icon" viewBox="0 0 24 24">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
             <circle cx="8.5" cy="8.5" r="1.5"/>
             <polyline points="21 15 16 10 5 21"/>
           </svg>
         </div>
-        Photo Library
+        <div class="action-card-text">
+          <span class="action-card-title">Photo Library</span>
+          <span class="action-card-sub">Choose multiple screenshots</span>
+        </div>
       </button>
     </div>
 
-    <!-- Live Upload Queue -->
+    <!-- Live Upload Queue Section -->
     <div class="queue-container" id="queueSection" style="display: none;">
-      <div class="section-title">
-        <span>Upload Activity</span>
+      <div class="queue-header">
+        <span class="queue-title">Upload Activity</span>
+        <span class="queue-count" id="queueCountBadge">0 files</span>
       </div>
       <div class="queue-list" id="queueList"></div>
     </div>
@@ -170,12 +172,12 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label" for="inputRoomCode">Room Code (e.g. DMP-8X9K)</label>
+          <label class="form-label" for="inputRoomCode">Room Code (e.g. DMP-7K9X2M4P)</label>
           <input type="text" class="form-input" id="inputRoomCode" placeholder="Enter Room Code" />
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-submit" id="btnSaveRoom">Connect</button>
+        <button class="btn-submit" id="btnSaveRoom">Connect Room</button>
       </div>
     </div>
   </div>
@@ -184,7 +186,7 @@
   <div class="modal-overlay" id="settingsModal">
     <div class="modal-content">
       <div class="modal-header">
-        <div class="modal-title">Supabase Backend</div>
+        <div class="modal-title">Supabase Configuration</div>
         <button class="btn-icon" id="btnCloseSettings">
           <svg class="icon" viewBox="0 0 24 24">
             <line x1="18" y1="6" x2="6" y2="18"/>
@@ -203,7 +205,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-submit" id="btnSaveSettings">Save</button>
+        <button class="btn-submit" id="btnSaveSettings">Save Settings</button>
       </div>
     </div>
   </div>

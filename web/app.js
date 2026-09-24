@@ -1,5 +1,6 @@
 // ==============================================================================
-// DUMPY Mobile Web Uploader — Controller with Google Auth & Direct Supabase Upload
+// DUMPY Mobile Web Uploader — Zero-Auth Controller with Device ID Tracking
+// Pure Room-based cryptographic isolation with anonymous device fingerprinting
 // ==============================================================================
 
 (function(global) {
@@ -41,11 +42,26 @@
     }
   };
 
+  // Generate or retrieve anonymous device ID
+  function getDeviceId() {
+    let deviceId = safeStorage.getItem('dumpy_device_id');
+    if (!deviceId) {
+      // Generate UUID v4-like identifier
+      deviceId = 'DEV-' + 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      }).toUpperCase();
+      safeStorage.setItem('dumpy_device_id', deviceId);
+    }
+    return deviceId;
+  }
+
   // State
   const state = {
     roomId: '',
+    deviceId: getDeviceId(),
     config: window.getSupabaseConfig ? window.getSupabaseConfig() : {},
-    currentUser: null,
     uploadQueue: [],
     recentUploads: []
   };
@@ -61,20 +77,12 @@
     btnChangeRoom: document.getElementById('btnChangeRoom'),
     btnSettings: document.getElementById('btnSettings'),
     uploadCard: document.getElementById('uploadCard'),
-    btnUploadShutter: document.getElementById('btnUploadShutter'),
     fileInput: document.getElementById('fileInput'),
     cameraInput: document.getElementById('cameraInput'),
     btnCamera: document.getElementById('btnCamera'),
     btnGallery: document.getElementById('btnGallery'),
     queueSection: document.getElementById('queueSection'),
     queueList: document.getElementById('queueList'),
-    
-    // Auth
-    btnGoogleAuth: document.getElementById('btnGoogleAuth'),
-    userProfilePill: document.getElementById('userProfilePill'),
-    userAvatar: document.getElementById('userAvatar'),
-    userName: document.getElementById('userName'),
-    btnSignOut: document.getElementById('btnSignOut'),
     
     // Room Modal
     roomModal: document.getElementById('roomModal'),
@@ -107,7 +115,8 @@
       if (savedRoom) {
         state.roomId = savedRoom;
       } else {
-        state.roomId = 'DMP-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+        // Generate secure 10-char room ID
+        state.roomId = 'DMP-' + 'XXXXXXXX'.replace(/X/g, () => '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random() * 32)]);
         safeStorage.setItem('dumpy_active_room', state.roomId);
       }
     }
@@ -155,181 +164,6 @@
     }
   }
 
-  // Initialize and Check Google OAuth Session
-  async function initAuth() {
-    const config = window.getSupabaseConfig();
-    
-    // Check if error returned in query or hash
-    const urlParams = new URLSearchParams(window.location.search);
-    const hashStr = window.location.hash ? window.location.hash.substring(1) : '';
-    const hashParams = new URLSearchParams(hashStr);
-
-    const errorDesc = hashParams.get('error_description') || urlParams.get('error_description') || hashParams.get('error') || urlParams.get('error');
-    if (errorDesc) {
-      console.error("Google Auth error:", errorDesc);
-      showToast(`Google Sign-in: ${decodeURIComponent(errorDesc)}`, 5000);
-    }
-
-    // 1. Check if redirect contains access_token in hash (#access_token=...&refresh_token=...)
-    if (hashStr && hashParams.has('access_token')) {
-      const accessToken = hashParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token');
-
-      if (accessToken) {
-        safeStorage.setItem('dumpy_auth_token', accessToken);
-        if (refreshToken) safeStorage.setItem('dumpy_refresh_token', refreshToken);
-        
-        // Clean hash from address bar without losing query parameters (?room=...)
-        const cleanUrl = window.location.pathname + window.location.search;
-        window.history.replaceState(null, '', cleanUrl);
-        showToast('Signed in with Google!');
-      }
-    }
-
-    // 2. Check if redirect contains auth code (?code=...)
-    const authCode = urlParams.get('code');
-    if (authCode && config.url && config.key) {
-      try {
-        const tokenRes = await fetch(`${config.url}/auth/v1/token?grant_type=pkce`, {
-          method: 'POST',
-          headers: {
-            'apikey': config.key,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            auth_code: authCode,
-            code_verifier: safeStorage.getItem('dumpy_code_verifier') || ''
-          })
-        });
-
-        if (tokenRes.ok) {
-          const tokenData = await tokenRes.json();
-          if (tokenData.access_token) {
-            safeStorage.setItem('dumpy_auth_token', tokenData.access_token);
-            if (tokenData.refresh_token) safeStorage.setItem('dumpy_refresh_token', tokenData.refresh_token);
-            urlParams.delete('code');
-            const cleanSearch = urlParams.toString() ? ('?' + urlParams.toString()) : '';
-            window.history.replaceState(null, '', window.location.pathname + cleanSearch);
-            showToast('Signed in with Google!');
-          }
-        }
-      } catch (e) {
-        console.warn('PKCE exchange error:', e);
-      }
-    }
-
-    // 3. Validate existing stored token
-    const token = safeStorage.getItem('dumpy_auth_token');
-    if (token && config.url && config.key) {
-      try {
-        const res = await fetch(`${config.url}/auth/v1/user`, {
-          headers: {
-            'apikey': config.key,
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (res.ok) {
-          const user = await res.json();
-          state.currentUser = user;
-          syncUserProfile(user);
-          renderAuthUI();
-          return;
-        } else {
-          safeStorage.removeItem('dumpy_auth_token');
-        }
-      } catch (err) {
-        console.warn('Auth check failed:', err);
-      }
-    }
-
-    renderAuthUI();
-  }
-
-  // Client-side fallback sync to dumpy_users table
-  async function syncUserProfile(user) {
-    const config = window.getSupabaseConfig();
-    if (!config.url || !config.key || !user) return;
-    try {
-      const meta = user.user_metadata || {};
-      const fullName = meta.full_name || meta.name || user.email.split('@')[0];
-      const avatarUrl = meta.avatar_url || meta.picture || '';
-
-      await fetch(`${config.url}/rest/v1/dumpy_users`, {
-        method: 'POST',
-        headers: {
-          'apikey': config.key,
-          'Authorization': `Bearer ${config.key}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'resolution=merge-duplicates'
-        },
-        body: JSON.stringify({
-          id: user.id,
-          email: user.email,
-          full_name: fullName,
-          avatar_url: avatarUrl,
-          updated_at: new Date().toISOString()
-        })
-      });
-    } catch (e) {
-      console.warn('User profile sync:', e);
-    }
-  }
-
-  // Render User Auth Status in Header
-  function renderAuthUI() {
-    if (state.currentUser) {
-      el.btnGoogleAuth.style.display = 'none';
-      el.userProfilePill.style.display = 'flex';
-      
-      const meta = state.currentUser.user_metadata || {};
-      const fullName = meta.full_name || meta.name || state.currentUser.email.split('@')[0];
-      const avatarUrl = meta.avatar_url || meta.picture || '';
-
-      el.userName.textContent = fullName;
-      if (avatarUrl) {
-        el.userAvatar.src = avatarUrl;
-        el.userAvatar.style.display = 'block';
-      } else {
-        el.userAvatar.style.display = 'none';
-      }
-    } else {
-      el.btnGoogleAuth.style.display = 'inline-flex';
-      el.userProfilePill.style.display = 'none';
-    }
-  }
-
-  function getOAuthRedirectUrl() {
-    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-      return window.location.href.split('#')[0];
-    }
-    const base = 'https://dumpy-figma-plugin.vercel.app/web/index.html';
-    return state.roomId ? `${base}?room=${encodeURIComponent(state.roomId)}` : base;
-  }
-
-  // Sign In with Google
-  function signInWithGoogle() {
-    const config = window.getSupabaseConfig();
-    if (!config.url || !config.key || config.url.includes('your-project')) {
-      showToast('Set your Supabase Project URL & Key first in Settings');
-      el.settingsModal.classList.add('open');
-      return;
-    }
-
-    const redirectUrl = getOAuthRedirectUrl();
-    const authUrl = `${config.url}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirectUrl)}`;
-    window.location.href = authUrl;
-  }
-
-  // Sign Out
-  function signOut() {
-    safeStorage.removeItem('dumpy_auth_token');
-    safeStorage.removeItem('dumpy_refresh_token');
-    state.currentUser = null;
-    renderAuthUI();
-    showToast('Signed out');
-  }
-
   // Helper: Read image dimensions
   function getImageDimensions(file) {
     return new Promise((resolve) => {
@@ -345,7 +179,7 @@
     });
   }
 
-  // Direct Supabase Storage + Database Upload
+  // Direct Supabase Storage + Database Upload with device_id tracking
   async function uploadScreenshot(fileItem) {
     const { file, id } = fileItem;
     const config = window.getSupabaseConfig();
@@ -371,13 +205,12 @@
       if (progressBar) progressBar.style.width = '30%';
 
       // 1. Upload to Supabase Storage via REST API
-      const authToken = safeStorage.getItem('dumpy_auth_token') || config.key;
       const uploadUrl = `${config.url}/storage/v1/object/${config.bucket}/${storagePath}`;
       const uploadResponse = await fetch(uploadUrl, {
         method: 'POST',
         headers: {
           'apikey': config.key,
-          'Authorization': `Bearer ${authToken}`,
+          'Authorization': `Bearer ${config.key}`,
           'Content-Type': file.type || 'image/png',
           'x-upsert': 'true'
         },
@@ -394,10 +227,11 @@
       // 2. Construct public CDN URL
       const publicUrl = `${config.url}/storage/v1/object/public/${config.bucket}/${storagePath}`;
 
-      // 3. Insert metadata record into `dumpy_screenshots` table
+      // 3. Insert metadata record into `dumpy_screenshots` table with device_id
       const insertUrl = `${config.url}/rest/v1/dumpy_screenshots`;
       const recordPayload = {
         room_id: state.roomId,
+        device_id: state.deviceId,
         file_name: file.name,
         file_url: publicUrl,
         storage_path: storagePath,
@@ -406,16 +240,11 @@
         is_inserted: false
       };
 
-      if (state.currentUser && state.currentUser.id) {
-        recordPayload.user_id = state.currentUser.id;
-        recordPayload.user_email = state.currentUser.email;
-      }
-
       const dbResponse = await fetch(insertUrl, {
         method: 'POST',
         headers: {
           'apikey': config.key,
-          'Authorization': `Bearer ${authToken}`,
+          'Authorization': `Bearer ${config.key}`,
           'Content-Type': 'application/json',
           'Prefer': 'return=representation'
         },
@@ -508,29 +337,31 @@
     }
   }
 
-  // Event Listeners
-  el.btnGoogleAuth.addEventListener('click', signInWithGoogle);
-  el.btnSignOut.addEventListener('click', signOut);
-
-  // Big upload card & Shutter button click triggers
+  // Event Listeners - Pure Room-based, no auth
+  
+  // Fixed Upload Flow: Main card and shutter button DO NOT trigger inputs directly
+  // They're just visual indicators. Users must explicitly click Camera or Gallery buttons.
+  
+  // Remove direct triggers - upload card is now just informational
   el.uploadCard.addEventListener('click', (e) => {
-    if (e.target !== el.fileInput) {
-      el.fileInput.click();
-    }
+    // Show a hint toast instead of triggering upload
+    showToast('📸 Choose Camera or Gallery below to upload');
   });
 
-  if (el.btnUploadShutter) {
-    el.btnUploadShutter.addEventListener('click', (e) => {
-      e.stopPropagation();
-      el.fileInput.click();
-    });
-  }
-
+  // File input handlers - only triggered by explicit button clicks
   el.fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
   el.cameraInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
-  el.btnCamera.addEventListener('click', () => el.cameraInput.click());
-  el.btnGallery.addEventListener('click', () => el.fileInput.click());
+  // Explicit action buttons - these are the ONLY ways to trigger upload
+  el.btnCamera.addEventListener('click', () => {
+    triggerHaptic();
+    el.cameraInput.click();
+  });
+  
+  el.btnGallery.addEventListener('click', () => {
+    triggerHaptic();
+    el.fileInput.click();
+  });
 
   // QR Code Toggle
   if (el.btnToggleQR) {
@@ -565,21 +396,25 @@
     });
   });
 
-  // Drag & Drop
+  // Drag & Drop - Keep this working, but with better visual feedback
   el.uploadCard.addEventListener('dragover', (e) => {
     e.preventDefault();
     el.uploadCard.classList.add('drag-over');
+    el.uploadCard.querySelector('.upload-title').textContent = 'Drop Screenshots Here';
   });
 
   el.uploadCard.addEventListener('dragleave', () => {
     el.uploadCard.classList.remove('drag-over');
+    el.uploadCard.querySelector('.upload-title').textContent = 'Ready to Upload';
   });
 
   el.uploadCard.addEventListener('drop', (e) => {
     e.preventDefault();
     el.uploadCard.classList.remove('drag-over');
+    el.uploadCard.querySelector('.upload-title').textContent = 'Ready to Upload';
     if (e.dataTransfer && e.dataTransfer.files) {
       handleFiles(e.dataTransfer.files);
+      showToast(`📸 Processing ${e.dataTransfer.files.length} screenshot(s)`);
     }
   });
 
@@ -603,7 +438,7 @@
 
   el.btnSaveRoom.addEventListener('click', () => {
     const val = el.inputRoomCode.value.trim().toUpperCase();
-    if (val) {
+    if (val && val.length >= 8) {
       state.roomId = val;
       safeStorage.setItem('dumpy_active_room', state.roomId);
       el.roomCodeDisplay.textContent = state.roomId;
@@ -615,6 +450,8 @@
       updatePairingUI();
       el.roomModal.classList.remove('open');
       showToast(`Switched to room ${state.roomId}`);
+    } else {
+      showToast('Please enter a valid Room ID (e.g., DMP-7K9X2M4P)');
     }
   });
 
@@ -641,5 +478,4 @@
 
   // Boot
   initRoomId();
-  initAuth();
 })(window);
