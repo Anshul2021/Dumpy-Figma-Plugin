@@ -162,7 +162,7 @@ figma.ui.onmessage = async (msg) => {
         // Place into Section or canvas
         let targetSection = null;
         if (msg.sectionId) {
-          const found = figma.getNodeById(msg.sectionId);
+          const found = await figma.getNodeByIdAsync(msg.sectionId);
           if (found && found.type === "SECTION") {
             targetSection = found;
           }
@@ -221,7 +221,7 @@ figma.ui.onmessage = async (msg) => {
         // 1. Resolve or Create Target Section
         let section = null;
         if (msg.sectionId) {
-          const found = figma.getNodeById(msg.sectionId);
+          const found = await figma.getNodeByIdAsync(msg.sectionId);
           if (found && found.type === "SECTION") {
             section = found;
           }
