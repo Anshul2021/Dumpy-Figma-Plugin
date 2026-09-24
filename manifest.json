@@ -12,8 +12,12 @@
   ],
   "networkAccess": {
     "allowedDomains": [
-      "*"
+      "https://fonts.googleapis.com",
+      "https://fonts.gstatic.com",
+      "https://*.supabase.co",
+      "https://dumpy-figma-plugin.vercel.app",
+      "https://api.qrserver.com"
     ],
-    "reasoning": "Dumpy connects to your Supabase project to poll incoming mobile screenshots in real time and loads the DM Sans Google font."
+    "reasoning": "Dumpy connects to Supabase to poll incoming mobile screenshots in real time, loads the DM Sans Google font, and generates pairing QR codes."
   }
 }
