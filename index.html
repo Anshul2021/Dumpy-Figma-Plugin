@@ -17,11 +17,8 @@
 </head>
 <body>
 
-  <!-- Subtle Ambient Glow Background -->
-  <div class="app-background-glow"></div>
-
   <div class="app-wrapper">
-    <!-- Clean App Header with Room ID Badge -->
+    <!-- Header: Brand Logo + Clean Room Code (No "Room" or "ID" text) -->
     <header class="app-header">
       <div class="brand-wrap">
         <div class="brand-icon">
@@ -29,16 +26,13 @@
             <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
           </svg>
         </div>
-        <div class="brand-text-group">
-          <span class="brand-title">Dumpy</span>
-          <span class="brand-badge">Beam</span>
-        </div>
+        <span class="brand-title">Dumpy</span>
       </div>
 
-      <!-- Room ID Badge with Tap-to-Copy -->
-      <div class="room-pill" id="roomCodeDisplay" title="Tap to copy Room ID">
+      <!-- Clean Room Code Badge (Just the code with live dot & copy icon) -->
+      <div class="room-code-tag" id="roomCodeDisplay" title="Tap to copy pairing code" role="button" tabindex="0">
         <span class="live-dot"></span>
-        <span class="room-code-text" id="roomCodeText">DMP-........</span>
+        <span class="room-code-val" id="roomCodeText">DMP-........</span>
         <svg class="icon copy-icon" viewBox="0 0 24 24">
           <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
           <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
@@ -46,21 +40,34 @@
       </div>
     </header>
 
-    <!-- Main Content Container (Padded above bottom floating FAB bar) -->
+    <!-- Main Content Area -->
     <main class="main-content">
-      <!-- Hero Interactive Dropzone Card -->
-      <div class="upload-dropzone" id="uploadCard" role="button" tabindex="0" title="Tap or drop screenshots to beam to Figma">
-        <div class="dropzone-pulse-halo"></div>
-        <div class="dropzone-icon-wrap">
-          <svg class="icon upload-arrow-icon" viewBox="0 0 24 24">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
+      <!-- Creative Minimal Empty State / Interactive Drop Area -->
+      <div class="empty-dropzone" id="uploadCard" role="button" tabindex="0" title="Tap to select photos or drop files">
+        <div class="creative-art">
+          <div class="art-card art-card-back">
+            <div class="art-line art-line-1"></div>
+            <div class="art-line art-line-2"></div>
+          </div>
+          <div class="art-card art-card-front">
+            <div class="art-image-icon">
+              <svg class="icon" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+            <div class="art-badge">
+              <svg class="icon badge-icon" viewBox="0 0 24 24">
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+          </div>
         </div>
-        <div class="dropzone-text-group">
-          <div class="dropzone-title">Ready to Beam</div>
-          <div class="dropzone-subtitle">Drop screenshots here or choose from below</div>
+        <div class="empty-copy">
+          <div class="empty-headline" id="dropzoneTitle">Drop screenshots here</div>
+          <p class="empty-subtext">Tap anywhere to browse or use the buttons below to beam photos to Figma</p>
         </div>
       </div>
 
@@ -84,7 +91,7 @@
       </section>
     </main>
 
-    <!-- Bottom Floating Action Bar (Dual FAB Buttons) -->
+    <!-- Bottom Floating Action Bar (Solid Colors) -->
     <footer class="bottom-fab-bar">
       <div class="fab-grid">
         <!-- Take Photo FAB -->
@@ -107,7 +114,7 @@
               <polyline points="21 15 16 10 5 21"/>
             </svg>
           </div>
-          <span class="fab-label">Upload from Gallery</span>
+          <span class="fab-label">Upload Gallery</span>
         </button>
       </div>
     </footer>
@@ -115,7 +122,7 @@
 
   <!-- Dedicated Off-DOM Hidden File Inputs -->
   <div style="display: none; visibility: hidden; position: fixed; pointer-events: none; width: 0; height: 0; overflow: hidden;" aria-hidden="true">
-    <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/heic,image/heif,image/*" multiple />
+    <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/heic,image/heif,image/svg+xml,image/*" multiple />
     <input type="file" id="cameraInput" accept="image/*" capture="environment" />
   </div>
 

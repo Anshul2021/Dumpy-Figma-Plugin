@@ -115,6 +115,30 @@
     });
   }
 
+  // Resolve clean MIME type for any file format
+  function getEffectiveMimeType(file) {
+    if (file.type && file.type.trim() !== '') {
+      return file.type;
+    }
+    const ext = (file.name || '').split('.').pop().toLowerCase();
+    const mimeMap = {
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      webp: 'image/webp',
+      gif: 'image/gif',
+      svg: 'image/svg+xml',
+      heic: 'image/heic',
+      heif: 'image/heif',
+      avif: 'image/avif',
+      bmp: 'image/bmp',
+      ico: 'image/x-icon',
+      tiff: 'image/tiff',
+      tif: 'image/tiff'
+    };
+    return mimeMap[ext] || 'image/png';
+  }
+
   // Direct Supabase Storage + Database Upload
   async function uploadScreenshot(fileItem) {
     const { file, id } = fileItem;
@@ -136,6 +160,7 @@
       const timestamp = Date.now();
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
       const storagePath = `${encodeURIComponent(state.roomId)}/${timestamp}_${sanitizedName}`;
+      const mimeType = getEffectiveMimeType(file);
       
       if (progressBar) progressBar.style.width = '35%';
 
@@ -146,7 +171,7 @@
         headers: {
           'apikey': config.key,
           'Authorization': `Bearer ${config.key}`,
-          'Content-Type': file.type || 'image/png',
+          'Content-Type': mimeType,
           'x-upsert': 'true'
         },
         body: file
@@ -154,7 +179,16 @@
 
       if (!uploadResponse.ok) {
         const errorText = await uploadResponse.text();
-        throw new Error(`Storage upload failed (${uploadResponse.status}): ${errorText}`);
+        let parsedMessage = errorText;
+        try {
+          const jsonErr = JSON.parse(errorText);
+          if (jsonErr.message) parsedMessage = jsonErr.message;
+        } catch (e) {}
+
+        if (parsedMessage.includes('mime type') || parsedMessage.includes('invalid_mime_type')) {
+          throw new Error(`Storage bucket MIME restriction: ${parsedMessage}. Update bucket allowed_mime_types in Supabase.`);
+        }
+        throw new Error(`Storage upload failed (${uploadResponse.status}): ${parsedMessage}`);
       }
 
       if (progressBar) progressBar.style.width = '75%';
@@ -171,7 +205,7 @@
         file_url: publicUrl,
         storage_path: storagePath,
         file_size: file.size,
-        mime_type: file.type || 'image/png',
+        mime_type: mimeType,
         is_inserted: false
       };
 
@@ -289,24 +323,24 @@
     el.uploadCard.addEventListener('dragover', (e) => {
       e.preventDefault();
       el.uploadCard.classList.add('drag-over');
-      const titleEl = el.uploadCard.querySelector('.dropzone-title');
+      const titleEl = el.uploadCard.querySelector('.empty-headline');
       if (titleEl) titleEl.textContent = 'Drop Screenshots Here';
     });
 
     el.uploadCard.addEventListener('dragleave', () => {
       el.uploadCard.classList.remove('drag-over');
-      const titleEl = el.uploadCard.querySelector('.dropzone-title');
-      if (titleEl) titleEl.textContent = 'Ready to Beam';
+      const titleEl = el.uploadCard.querySelector('.empty-headline');
+      if (titleEl) titleEl.textContent = 'Drop screenshots here';
     });
 
     el.uploadCard.addEventListener('drop', (e) => {
       e.preventDefault();
       el.uploadCard.classList.remove('drag-over');
-      const titleEl = el.uploadCard.querySelector('.dropzone-title');
-      if (titleEl) titleEl.textContent = 'Ready to Beam';
+      const titleEl = el.uploadCard.querySelector('.empty-headline');
+      if (titleEl) titleEl.textContent = 'Drop screenshots here';
       if (e.dataTransfer && e.dataTransfer.files) {
         handleFiles(e.dataTransfer.files);
-        showToast(`📸 Processing ${e.dataTransfer.files.length} screenshot(s)`);
+        showToast(`Processing ${e.dataTransfer.files.length} screenshot(s)`);
       }
     });
   }
@@ -347,13 +381,13 @@
     });
   }
 
-  // 4. Room Code Click to Copy
+  // 4. Room Code Click to Copy (No 'Room' or 'ID' label)
   if (el.roomCodeDisplay) {
     el.roomCodeDisplay.addEventListener('click', () => {
       navigator.clipboard.writeText(state.roomId).then(() => {
-        showToast(`📋 Copied Room ${state.roomId}!`);
+        showToast(`📋 Copied ${state.roomId}`);
       }).catch(() => {
-        showToast(`Room: ${state.roomId}`);
+        showToast(`${state.roomId}`);
       });
     });
   }

@@ -93,12 +93,12 @@ VALUES (
     'dumpy-screenshots',
     true,
     52428800, -- 50MB per file limit
-    ARRAY['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif', 'image/heic', 'image/heif']
+    NULL      -- Allows all image formats (PNG, JPG, SVG, WebP, GIF, HEIC, AVIF, etc.)
 )
 ON CONFLICT (id) DO UPDATE SET
     public = true,
     file_size_limit = 52428800,
-    allowed_mime_types = ARRAY['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
+    allowed_mime_types = NULL;
 
 -- 9. Storage Bucket RLS Policies - Full Anonymous Public Access
 DROP POLICY IF EXISTS "Allow public upload to dumpy-screenshots bucket" ON storage.objects;
